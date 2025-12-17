@@ -8,10 +8,7 @@ import { authApi } from "../../api/auth";
 export default function Profile() {
   const { token, user, refresh, setAvatar } = useAuth();
 
-  // 🔹 avatar preview
   const [avatarPreview, setAvatarPreview] = useState(user?.avatarUrl || "");
-
-  // 🔹 ref for file input
   const fileRef = useRef(null);
 
   const [form, setForm] = useState({
@@ -26,7 +23,6 @@ export default function Profile() {
   const [msg, setMsg] = useState("");
   const [err, setErr] = useState("");
 
-  // 🔹 file picker handler
   function onPickAvatar(e) {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -70,7 +66,7 @@ export default function Profile() {
     <div className="mx-auto max-w-2xl">
       <Card title="My profile">
 
-        {/* 🔹 Avatar section */}
+        {/* avatar section */}
         <div className="mb-4 flex items-center gap-4">
           <div className="h-16 w-16 overflow-hidden rounded-full ring-1 ring-slate-200 dark:ring-slate-800">
             {avatarPreview ? (
@@ -110,7 +106,7 @@ export default function Profile() {
           </div>
         </div>
 
-        {/* 🔹 Profile form */}
+        {/* profile form */}
         <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
           <Input label="First name" value={form.first_name}
             onChange={(e)=>setForm({...form, first_name:e.target.value})} />

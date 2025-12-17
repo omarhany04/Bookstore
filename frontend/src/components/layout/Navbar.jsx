@@ -78,7 +78,6 @@ export default function Navbar() {
                   className="hidden sm:flex items-center gap-2 rounded-full border border-slate-200 bg-white/60 px-3 py-2 text-sm font-semibold text-slate-700 shadow-sm transition hover:bg-white hover:shadow
                              dark:border-slate-800 dark:bg-slate-900/40 dark:text-slate-200 dark:hover:bg-slate-900/60"
                 >
-                  {/* ✅ Avatar (image if exists, else first letter) */}
                   {user?.avatarUrl ? (
                     <img
                       src={user.avatarUrl}
