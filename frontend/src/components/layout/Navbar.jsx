@@ -1,6 +1,7 @@
 import { Link, NavLink, useNavigate } from "react-router-dom";
 import Button from "../ui/Button";
 import { useAuth } from "../../context/AuthContext";
+import logo from "../../assets/BookyLogo.jpg";
 
 const navLinkClass = ({ isActive }) =>
   `
@@ -24,18 +25,12 @@ export default function Navbar() {
         <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-3">
           
           {/* Logo */}
-          <Link to="/books" className="group flex items-center gap-3">
-            <div className="grid h-10 w-10 place-items-center rounded-2xl bg-slate-900 text-white shadow-sm">
-              <span className="text-sm font-black">B</span>
-            </div>
-            <div className="leading-tight">
-              <div className="text-sm font-extrabold tracking-tight text-slate-900">
-                Bookstore <span className="text-slate-400">OPS</span>
-              </div>
-              <div className="text-xs text-slate-500 transition group-hover:text-slate-600">
-                Online bookstore
-              </div>
-            </div>
+          <Link to="/books" className="flex items-center gap-3">
+            <img
+              src={logo}
+              alt="Bookstore OPS"
+              className="h-10 w-10 rounded-xl"
+            />
           </Link>
 
           {/* Navigation Pills */}
