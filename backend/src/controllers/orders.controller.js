@@ -86,7 +86,7 @@ exports.checkout = async (req, res, next) => {
       [order_id, total.toFixed(2)]
     );
 
-    // Clear cart items (logout also clears cart; but checkout should clear too)
+    // Clear cart items
     await client.query("DELETE FROM cart_items WHERE cart_id=$1", [cart_id]);
 
     await client.query("COMMIT");
@@ -109,7 +109,7 @@ exports.myOrders = async (req, res, next) => {
       [req.user.user_id]
     );
 
-    const ids = orders.rows.map(o => o.order_id);
+    const ids = orders.rows.map((o) => o.order_id);
     let itemsByOrder = {};
     if (ids.length) {
       const items = await db.query(
@@ -125,8 +125,100 @@ exports.myOrders = async (req, res, next) => {
       }
     }
 
-    res.json(orders.rows.map(o => ({ ...o, items: itemsByOrder[o.order_id] || [] })));
+    res.json(orders.rows.map((o) => ({ ...o, items: itemsByOrder[o.order_id] || [] })));
   } catch (err) {
     next(err);
+  }
+};
+
+exports.cancelMyOrder = async (req, res, next) => {
+  const orderId = Number(req.params.id);
+  const userId = req.user.user_id;
+
+  if (!Number.isFinite(orderId)) {
+    return res.status(400).json({ message: "Invalid order id" });
+  }
+
+  const client = await db.pool.connect();
+  try {
+    await client.query("BEGIN");
+
+    // Lock the order row (must belong to current user)
+    const orderRes = await client.query(
+      `SELECT order_id, status
+       FROM customer_orders
+       WHERE order_id = $1 AND user_id = $2
+       FOR UPDATE`,
+      [orderId, userId]
+    );
+
+    if (!orderRes.rowCount) {
+      await client.query("ROLLBACK");
+      return res.status(404).json({ message: "Order not found" });
+    }
+
+    const order = orderRes.rows[0];
+
+    if (order.status === "Cancelled") {
+      await client.query("ROLLBACK");
+      return res.status(400).json({ message: "Order already cancelled" });
+    }
+
+    // Only confirmed orders can be cancelled (since stock was deducted)
+    if (order.status !== "Confirmed") {
+      await client.query("ROLLBACK");
+      return res.status(400).json({ message: "Only confirmed orders can be cancelled" });
+    }
+
+    // Get items
+    const itemsRes = await client.query(
+      `SELECT isbn, qty
+       FROM customer_order_items
+       WHERE order_id = $1`,
+      [orderId]
+    );
+
+    if (!itemsRes.rowCount) {
+      await client.query("ROLLBACK");
+      return res.status(400).json({ message: "Order has no items" });
+    }
+
+    // Lock related book rows to avoid race conditions, then restore stock
+    const isbns = itemsRes.rows.map((x) => x.isbn);
+    await client.query(
+      `SELECT isbn
+       FROM books
+       WHERE isbn = ANY($1::varchar[])
+       FOR UPDATE`,
+      [isbns]
+    );
+
+    for (const it of itemsRes.rows) {
+      await client.query(
+        `UPDATE books
+         SET stock_qty = stock_qty + $1
+         WHERE isbn = $2`,
+        [Number(it.qty), it.isbn]
+      );
+    }
+
+    // Remove the sale record (so reports won't count it)
+    await client.query(`DELETE FROM sales_transactions WHERE order_id = $1`, [orderId]);
+
+    // Mark cancelled (keep history)
+    await client.query(
+      `UPDATE customer_orders
+       SET status = 'Cancelled'
+       WHERE order_id = $1`,
+      [orderId]
+    );
+
+    await client.query("COMMIT");
+    res.json({ ok: true });
+  } catch (err) {
+    await client.query("ROLLBACK");
+    next(err);
+  } finally {
+    client.release();
   }
 };

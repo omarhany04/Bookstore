@@ -67,7 +67,6 @@ export default function BookDetails() {
 
       <Card title={<span className="text-2xl font-bold text-slate-900 dark:text-white">{book.title}</span>}>
         <div className="grid grid-cols-1 gap-4 md:grid-cols-3 items-center">
-          {/* Left panel: bigger + better hierarchy */}
           <div className="md:col-span-2 space-y-4 text-base text-slate-800 leading-relaxed dark:text-slate-200">
             <div className="flex gap-2">
               <span className="min-w-[90px] font-medium text-slate-500 dark:text-slate-400">ISBN</span>
@@ -96,8 +95,6 @@ export default function BookDetails() {
               <span className="font-semibold text-slate-900 dark:text-slate-100">{book.publication_year}</span>
             </div>
           </div>
-
-          {/* Right panel: light theme restored + dark mode polished */}
           <div
             className="
               rounded-2xl p-5 ring-1 shadow-lg
