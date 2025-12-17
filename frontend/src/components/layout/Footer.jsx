@@ -1,5 +1,7 @@
 import { Link } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
+import { Lock, ShieldAlert, UserCog, Info } from "lucide-react";
+
 
 function SocialIcon({ href, label, children }) {
   return (
@@ -23,7 +25,54 @@ function SocialIcon({ href, label, children }) {
   );
 }
 
-function FooterLink({ to, children }) {
+function FooterLink({ to, children, disabled = false, tooltip }) {
+  // When disabled: prevent navigation + show tooltip on hover
+  if (disabled) {
+    return (
+      <div className="relative group">
+        <Link
+          to={to}
+          onClick={(e) => e.preventDefault()}
+          aria-disabled="true"
+          className="
+            inline-flex w-fit items-center rounded-xl px-3 py-2 text-sm font-semibold
+            text-slate-400 cursor-not-allowed select-none
+            transition-all
+            dark:text-slate-500
+          "
+        >
+          {children}
+        </Link>
+
+        {/* Tooltip (hover only) */}
+        <div
+          className="
+            pointer-events-none absolute left-0 top-full z-20 mt-2 w-max max-w-[260px]
+            opacity-0 translate-y-1 scale-[0.98]
+            transition-all duration-150
+            group-hover:opacity-100 group-hover:translate-y-0 group-hover:scale-100
+          "
+        >
+          <div
+            className="
+              rounded-2xl border border-slate-200 bg-white/95 px-3 py-2 text-xs font-semibold text-slate-700 shadow-lg
+              backdrop-blur
+              dark:border-slate-800 dark:bg-slate-950/90 dark:text-slate-200
+            "
+          >
+            <div className="flex items-start gap-2">
+              <span className="mt-[1px] inline-flex h-6 w-6 items-center justify-center rounded-xl
+                              bg-slate-900 text-white dark:bg-slate-100 dark:text-slate-900">
+                <ShieldAlert className="h-4 w-4" />
+              </span>
+              <span className="leading-relaxed">{tooltip}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <Link
       to={to}
@@ -42,12 +91,14 @@ function FooterLink({ to, children }) {
 
 export default function Footer() {
   const { user, isAuthed } = useAuth();
+  const isAdmin = user?.role === "ADMIN";
+
+  const adminTooltip = "Log in as admin first to access";
 
   return (
     <footer className="mt-20 bg-slate-200/60 backdrop-blur dark:bg-slate-900/70">
       <div className="mx-auto max-w-7xl px-4 pt-12">
         <div className="grid grid-cols-1 gap-10 items-start md:grid-cols-4">
-          
           {/* Brand + Social */}
           <div>
             <div className="text-xl font-black tracking-tight text-slate-900 dark:text-white">
@@ -116,31 +167,49 @@ export default function Footer() {
             </div>
 
             <div className="flex flex-col gap-1">
-            <FooterLink to="/how-to-buy">How to buy</FooterLink>
-            <FooterLink to="/shipping">Shipping & Returns</FooterLink>
-            <FooterLink to="/privacy">Privacy Policy</FooterLink>
-            <FooterLink to="/support">Contact support</FooterLink>
+              <FooterLink to="/how-to-buy">How to buy</FooterLink>
+              <FooterLink to="/shipping">Shipping & Returns</FooterLink>
+              <FooterLink to="/privacy">Privacy Policy</FooterLink>
+              <FooterLink to="/support">Contact support</FooterLink>
             </div>
           </div>
 
-          {/* Admin */}
+          {/* Admin (always visible; tooltip if not admin) */}
           <div>
             <div className="mb-3 text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
               Admin
             </div>
 
-            {user?.role === "ADMIN" ? (
-              <div className="flex flex-col gap-1">
-                <FooterLink to="/admin/dashboard">Dashboard</FooterLink>
-                <FooterLink to="/admin/books">Manage books</FooterLink>
-                <FooterLink to="/admin/replenishments">Replenishments</FooterLink>
-                <FooterLink to="/admin/reports">Reports</FooterLink>
-              </div>
-            ) : (
-              <div className="text-sm text-slate-600 dark:text-slate-400">
-                Admin tools appear here after logging in as an admin.
-              </div>
-            )}
+            <div className="flex flex-col gap-1">
+              <FooterLink
+                to="/admin/dashboard"
+                disabled={!isAdmin}
+                tooltip={adminTooltip}
+              >
+                Dashboard
+              </FooterLink>
+              <FooterLink
+                to="/admin/books"
+                disabled={!isAdmin}
+                tooltip={adminTooltip}
+              >
+                Manage books
+              </FooterLink>
+              <FooterLink
+                to="/admin/replenishments"
+                disabled={!isAdmin}
+                tooltip={adminTooltip}
+              >
+                Replenishments
+              </FooterLink>
+              <FooterLink
+                to="/admin/reports"
+                disabled={!isAdmin}
+                tooltip={adminTooltip}
+              >
+                Reports
+              </FooterLink>
+            </div>
           </div>
         </div>
       </div>

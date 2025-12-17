@@ -17,13 +17,16 @@ export default function Profile() {
     email: user?.email || "",
     phone: user?.phone || "",
     shipping_address: user?.shipping_address || "",
-    password: ""
+    password: "",
   });
 
   const [msg, setMsg] = useState("");
   const [err, setErr] = useState("");
 
   function onPickAvatar(e) {
+    setMsg("");
+    setErr("");
+
     const file = e.target.files?.[0];
     if (!file) return;
 
@@ -41,14 +44,26 @@ export default function Profile() {
     reader.onload = () => {
       const dataUrl = String(reader.result);
       setAvatarPreview(dataUrl); // preview
-      setAvatar(dataUrl);        // navbar + localStorage
+      setAvatar(dataUrl); // navbar + localStorage
+      setMsg("Photo updated.");
+
+      setTimeout(() => {
+        setMsg("");
+      }, 2500);
     };
     reader.readAsDataURL(file);
+  }
+
+  function updateField(key, value) {
+    setForm((prev) => ({ ...prev, [key]: value }));
+    if (msg) setMsg("");
+    if (err) setErr("");
   }
 
   async function save() {
     setMsg("");
     setErr("");
+
     try {
       const payload = { ...form };
       if (!payload.password) delete payload.password;
@@ -56,7 +71,12 @@ export default function Profile() {
       await authApi.updateMe(token, payload);
       await refresh();
 
-      setMsg("Updated ✅");
+      setMsg("Profile updated successfully.");
+
+      // auto-hide after 3 seconds
+      setTimeout(() => {
+        setMsg("");
+      }, 3000);
     } catch (e) {
       setErr(e.message);
     }
@@ -65,16 +85,11 @@ export default function Profile() {
   return (
     <div className="mx-auto max-w-2xl">
       <Card title="My profile">
-
         {/* avatar section */}
         <div className="mb-4 flex items-center gap-4">
           <div className="h-16 w-16 overflow-hidden rounded-full ring-1 ring-slate-200 dark:ring-slate-800">
             {avatarPreview ? (
-              <img
-                src={avatarPreview}
-                alt="Avatar"
-                className="h-full w-full object-cover"
-              />
+              <img src={avatarPreview} alt="Avatar" className="h-full w-full object-cover" />
             ) : (
               <div className="grid h-full w-full place-items-center bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-200">
                 {user?.username?.slice(0, 1)?.toUpperCase()}
@@ -92,44 +107,68 @@ export default function Profile() {
           />
 
           <div>
-            <Button
-              variant="secondary"
-              type="button"
-              onClick={() => fileRef.current?.click()}
-            >
+            <Button variant="secondary" type="button" onClick={() => fileRef.current?.click()}>
               Change photo
             </Button>
 
-            <div className="mt-1 text-xs text-slate-500">
-              JPG / PNG, max 2MB
-            </div>
+            <div className="mt-1 text-xs text-slate-500">JPG / PNG, max 2MB</div>
           </div>
         </div>
 
         {/* profile form */}
         <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
-          <Input label="First name" value={form.first_name}
-            onChange={(e)=>setForm({...form, first_name:e.target.value})} />
-          <Input label="Last name" value={form.last_name}
-            onChange={(e)=>setForm({...form, last_name:e.target.value})} />
-          <Input label="Email" value={form.email}
-            onChange={(e)=>setForm({...form, email:e.target.value})} />
-          <Input label="Phone" value={form.phone}
-            onChange={(e)=>setForm({...form, phone:e.target.value})} />
+          <Input
+            label="First name"
+            value={form.first_name}
+            onChange={(e) => updateField("first_name", e.target.value)}
+          />
+          <Input
+            label="Last name"
+            value={form.last_name}
+            onChange={(e) => updateField("last_name", e.target.value)}
+          />
+          <Input
+            label="Email"
+            value={form.email}
+            onChange={(e) => updateField("email", e.target.value)}
+          />
+          <Input
+            label="Phone"
+            value={form.phone}
+            onChange={(e) => updateField("phone", e.target.value)}
+          />
           <div className="md:col-span-2">
-            <Input label="Shipping address" value={form.shipping_address}
-              onChange={(e)=>setForm({...form, shipping_address:e.target.value})} />
+            <Input
+              label="Shipping address"
+              value={form.shipping_address}
+              onChange={(e) => updateField("shipping_address", e.target.value)}
+            />
           </div>
-          <Input label="New password (optional)" type="password"
+          <Input
+            label="New password (optional)"
+            type="password"
             value={form.password}
-            onChange={(e)=>setForm({...form, password:e.target.value})} />
+            onChange={(e) => updateField("password", e.target.value)}
+          />
         </div>
 
-        {err && <div className="mt-3 text-sm text-red-600">{err}</div>}
-        {msg && <div className="mt-3 text-sm text-emerald-700">{msg}</div>}
+        {/* messages */}
+        {err && (
+          <div className="mt-3 rounded-xl border border-red-300 bg-red-100 px-4 py-2 text-sm font-semibold text-red-800">
+            {err}
+          </div>
+        )}
+
+        {msg && (
+          <div className="mt-3 rounded-xl border border-emerald-300 bg-emerald-100 px-4 py-2 text-sm font-semibold text-emerald-800">
+            {msg}
+          </div>
+        )}
 
         <div className="mt-4">
-          <Button onClick={save}>Save changes</Button>
+          <Button onClick={save} type="button">
+            Save changes
+          </Button>
         </div>
       </Card>
     </div>
