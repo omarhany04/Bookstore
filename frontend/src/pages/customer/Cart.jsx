@@ -10,6 +10,7 @@ export default function Cart() {
   const { token } = useAuth();
   const [cart, setCart] = useState(null);
   const [err, setErr] = useState("");
+  const [busyIsbn, setBusyIsbn] = useState(null);
   const nav = useNavigate();
 
   async function load() {
@@ -22,24 +23,101 @@ export default function Cart() {
     }
   }
 
-  useEffect(() => { load(); }, []);
-
-  async function remove(isbn) {
-    await cartApi.remove(token, isbn);
+  useEffect(() => {
     load();
+  }, []);
+
+  async function inc(item) {
+    if (busyIsbn) return;
+    if (Number(item.stock_qty) > 0 && Number(item.qty) >= Number(item.stock_qty)) return;
+
+    setBusyIsbn(item.isbn);
+    try {
+      await cartApi.update(token, item.isbn, Number(item.qty) + 1);
+      await load();
+    } catch (e) {
+      setErr(e.message);
+    } finally {
+      setBusyIsbn(null);
+    }
+  }
+
+  async function dec(item) {
+    if (busyIsbn) return;
+
+    setBusyIsbn(item.isbn);
+    try {
+      const currentQty = Number(item.qty);
+
+      if (currentQty <= 1) {
+        await cartApi.remove(token, item.isbn);
+      } else {
+        await cartApi.update(token, item.isbn, currentQty - 1);
+      }
+
+      await load();
+    } catch (e) {
+      setErr(e.message);
+    } finally {
+      setBusyIsbn(null);
+    }
   }
 
   async function clear() {
-    await cartApi.clear(token);
-    load();
+    try {
+      await cartApi.clear(token);
+      load();
+    } catch (e) {
+      setErr(e.message);
+    }
   }
 
   const columns = [
     { key: "title", header: "Book" },
-    { key: "qty", header: "Qty" },
-    { key: "selling_price", header: "Unit" , render: r => Number(r.selling_price).toFixed(2) },
-    { key: "line_total", header: "Total", render: r => Number(r.line_total).toFixed(2) },
-    { key: "actions", header: "", render: r => <Button variant="secondary" onClick={() => remove(r.isbn)}>Remove</Button> },
+
+    {
+      key: "qty",
+      header: "Qty",
+      render: (r) => {
+        const isBusy = busyIsbn === r.isbn;
+        const atMax = Number(r.stock_qty) > 0 && Number(r.qty) >= Number(r.stock_qty);
+
+        return (
+          <div className="flex items-center gap-2">
+            <Button
+              variant="secondary"
+              className="px-3 py-1"
+              onClick={() => dec(r)}
+              disabled={isBusy}
+              type="button"
+              title={Number(r.qty) <= 1 ? "Remove item" : "Decrease quantity"}
+            >
+              −
+            </Button>
+
+            <span className="min-w-[28px] text-center font-semibold">{r.qty}</span>
+
+            <Button
+              variant="secondary"
+              className="px-3 py-1"
+              onClick={() => inc(r)}
+              disabled={isBusy || atMax}
+              type="button"
+              title={atMax ? "Reached stock limit" : "Increase quantity"}
+            >
+              +
+            </Button>
+
+            <span className="ml-2 text-xs text-slate-500">
+              {Number(r.stock_qty) > 0 ? `stock: ${r.stock_qty}` : ""}
+            </span>
+          </div>
+        );
+      },
+    },
+
+    { key: "selling_price", header: "Unit", render: (r) => Number(r.selling_price).toFixed(2) },
+    { key: "line_total", header: "Total", render: (r) => Number(r.line_total).toFixed(2) },
   ];
 
   if (err) return <div className="text-red-600">{err}</div>;
@@ -51,24 +129,32 @@ export default function Cart() {
         title="Your cart"
         right={
           <div className="flex gap-2">
-            <Button variant="secondary" onClick={load}>Refresh</Button>
-            <Button variant="danger" onClick={clear}>Clear</Button>
+            <Button variant="danger" onClick={clear} type="button">
+              Clear
+            </Button>
           </div>
         }
       >
         {cart.items.length === 0 ? (
           <div className="text-sm text-slate-600">
-            Cart is empty. <Link className="font-semibold text-slate-900" to="/books">Browse books</Link>
+            Cart is empty.{" "}
+            <Link className="font-semibold text-slate-900" to="/books">
+              Browse books
+            </Link>
           </div>
         ) : (
           <>
             <Table columns={columns} rows={cart.items} keyField="isbn" />
+
             <div className="mt-4 flex items-center justify-between">
               <div className="text-sm text-slate-600">Cart total</div>
               <div className="text-xl font-black">{Number(cart.total).toFixed(2)} EGP</div>
             </div>
+
             <div className="mt-4">
-              <Button className="w-full" onClick={() => nav("/checkout")}>Proceed to checkout</Button>
+              <Button className="w-full" onClick={() => nav("/checkout")} type="button">
+                Proceed to checkout
+              </Button>
             </div>
           </>
         )}
