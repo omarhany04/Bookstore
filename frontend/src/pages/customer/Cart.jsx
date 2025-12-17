@@ -29,11 +29,15 @@ export default function Cart() {
 
   async function inc(item) {
     if (busyIsbn) return;
-    if (Number(item.stock_qty) > 0 && Number(item.qty) >= Number(item.stock_qty)) return;
+
+    const stock = Number(item.stock_qty);
+    const qty = Number(item.qty);
+
+    if (stock <= 0 || qty >= stock) return;
 
     setBusyIsbn(item.isbn);
     try {
-      await cartApi.update(token, item.isbn, Number(item.qty) + 1);
+      await cartApi.update(token, item.isbn, qty + 1);
       await load();
     } catch (e) {
       setErr(e.message);
@@ -47,12 +51,12 @@ export default function Cart() {
 
     setBusyIsbn(item.isbn);
     try {
-      const currentQty = Number(item.qty);
+      const qty = Number(item.qty);
 
-      if (currentQty <= 1) {
+      if (qty <= 1) {
         await cartApi.remove(token, item.isbn);
       } else {
-        await cartApi.update(token, item.isbn, currentQty - 1);
+        await cartApi.update(token, item.isbn, qty - 1);
       }
 
       await load();
@@ -74,13 +78,14 @@ export default function Cart() {
 
   const columns = [
     { key: "title", header: "Book" },
-
     {
       key: "qty",
       header: "Qty",
       render: (r) => {
         const isBusy = busyIsbn === r.isbn;
-        const atMax = Number(r.stock_qty) > 0 && Number(r.qty) >= Number(r.stock_qty);
+        const stock = Number(r.stock_qty);
+        const qty = Number(r.qty);
+        const atMax = stock > 0 && qty >= stock;
 
         return (
           <div className="flex items-center gap-2">
@@ -90,7 +95,6 @@ export default function Cart() {
               onClick={() => dec(r)}
               disabled={isBusy}
               type="button"
-              title={Number(r.qty) <= 1 ? "Remove item" : "Decrease quantity"}
             >
               −
             </Button>
@@ -103,19 +107,17 @@ export default function Cart() {
               onClick={() => inc(r)}
               disabled={isBusy || atMax}
               type="button"
-              title={atMax ? "Reached stock limit" : "Increase quantity"}
             >
               +
             </Button>
 
             <span className="ml-2 text-xs text-slate-500">
-              {Number(r.stock_qty) > 0 ? `stock: ${r.stock_qty}` : ""}
+              stock: {stock}
             </span>
           </div>
         );
       },
     },
-
     { key: "selling_price", header: "Unit", render: (r) => Number(r.selling_price).toFixed(2) },
     { key: "line_total", header: "Total", render: (r) => Number(r.line_total).toFixed(2) },
   ];
@@ -148,7 +150,9 @@ export default function Cart() {
 
             <div className="mt-4 flex items-center justify-between">
               <div className="text-sm text-slate-600">Cart total</div>
-              <div className="text-xl font-black">{Number(cart.total).toFixed(2)} EGP</div>
+              <div className="text-xl font-black">
+                {Number(cart.total).toFixed(2)} EGP
+              </div>
             </div>
 
             <div className="mt-4">

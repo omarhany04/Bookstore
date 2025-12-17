@@ -1,5 +1,5 @@
 <h1>
-  <img src="../order-processing-system/frontend/src/assets/BookyLogo.jpg"
+  <img src="https://i.ibb.co/pv1wBhD2/Booky-Logo.jpg"
        alt="Project Logo"
        height="75"
        style="vertical-align: middle; margin-right: 12px;" />
