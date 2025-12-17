@@ -2,9 +2,14 @@ import { Routes, Route, Navigate } from "react-router-dom";
 import Navbar from "./components/layout/Navbar.jsx";
 import Sidebar from "./components/layout/Sidebar.jsx";
 import ProtectedRoute from "./components/layout/ProtectedRoute.jsx";
+import Footer from "./components/layout/Footer.jsx";
 
 import Login from "./pages/auth/Login.jsx";
 import Register from "./pages/auth/Register.jsx";
+import Support from "./pages/support/ContactSupport.jsx";
+import HowToBuy from "./pages/support/HowToBuy.jsx";
+import Shipping from "./pages/support/Shipping.jsx";
+import Privacy from "./pages/support/Privacy.jsx";
 
 import BrowseBooks from "./pages/customer/BrowseBooks.jsx";
 import BookDetails from "./pages/customer/BookDetails.jsx";
@@ -20,14 +25,21 @@ import Reports from "./pages/admin/Reports.jsx";
 
 export default function App() {
   return (
-    <div className="min-h-screen bg-slate-50 text-slate-900 dark:bg-slate-950 dark:text-slate-100">
+    <div className="flex min-h-screen flex-col bg-slate-50 text-slate-900 dark:bg-slate-950 dark:text-slate-100">
       <Navbar />
-      <div className="mx-auto max-w-7xl px-4 py-6">
+
+      {/* MAIN CONTENT */}
+      <div className="mx-auto w-full max-w-7xl flex-1 px-4 py-6">
         <Routes>
           <Route path="/" element={<Navigate to="/books" />} />
 
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
+          
+          <Route path="/how-to-buy" element={<HowToBuy />} />
+          <Route path="/shipping" element={<Shipping />} />
+          <Route path="/privacy" element={<Privacy />} />
+          <Route path="/support" element={<Support />} />
 
           {/* Customer */}
           <Route path="/books" element={<BrowseBooks />} />
@@ -64,6 +76,7 @@ export default function App() {
           <Route path="*" element={<div className="p-6">Not found</div>} />
         </Routes>
       </div>
+      <Footer />
     </div>
   );
 }

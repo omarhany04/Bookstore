@@ -3,16 +3,37 @@ const { z } = require("zod");
 const { validateCard } = require("../utils/validateCard");
 
 exports.checkout = async (req, res, next) => {
-  const schema = z.object({
-    cardNumber: z.string().min(12),
-    expiryMMYY: z.string().min(4).max(4),
-  });
+  // Supports both CARD and COD
+  const schema = z.discriminatedUnion("paymentMethod", [
+    z.object({
+      paymentMethod: z.literal("CARD"),
+      cardNumber: z.string().min(12),
+      expiryMMYY: z.string().min(4).max(4),
+    }),
+    z.object({
+      paymentMethod: z.literal("COD"),
+    }),
+  ]);
 
   const client = await db.pool.connect();
   try {
     const data = schema.parse(req.body);
-    const card = validateCard(data.cardNumber, data.expiryMMYY);
-    if (!card.ok) return res.status(400).json({ message: `Payment failed: ${card.reason}` });
+
+    // Validate card only if paymentMethod is CARD
+    let payment_last4 = null;
+
+    if (data.paymentMethod === "CARD") {
+      const card = validateCard(data.cardNumber, data.expiryMMYY);
+      if (!card.ok) {
+        return res
+          .status(400)
+          .json({ message: `Payment failed: ${card.reason}` });
+      }
+      payment_last4 = card.last4;
+    } else {
+      // COD: store a clear marker
+      payment_last4 = "COD";
+    }
 
     await client.query("BEGIN");
 
@@ -45,7 +66,9 @@ exports.checkout = async (req, res, next) => {
     for (const it of itemsRes.rows) {
       if (it.stock_qty < it.qty) {
         await client.query("ROLLBACK");
-        return res.status(400).json({ message: `Not enough stock for ${it.title}` });
+        return res
+          .status(400)
+          .json({ message: `Not enough stock for ${it.title}` });
       }
     }
 
@@ -54,7 +77,7 @@ exports.checkout = async (req, res, next) => {
       `INSERT INTO customer_orders(user_id, status, payment_last4)
        VALUES ($1, 'Pending', $2)
        RETURNING order_id`,
-      [req.user.user_id, card.last4]
+      [req.user.user_id, payment_last4]
     );
     const order_id = orderRes.rows[0].order_id;
 
@@ -125,7 +148,9 @@ exports.myOrders = async (req, res, next) => {
       }
     }
 
-    res.json(orders.rows.map((o) => ({ ...o, items: itemsByOrder[o.order_id] || [] })));
+    res.json(
+      orders.rows.map((o) => ({ ...o, items: itemsByOrder[o.order_id] || [] }))
+    );
   } catch (err) {
     next(err);
   }
@@ -167,7 +192,9 @@ exports.cancelMyOrder = async (req, res, next) => {
     // Only confirmed orders can be cancelled (since stock was deducted)
     if (order.status !== "Confirmed") {
       await client.query("ROLLBACK");
-      return res.status(400).json({ message: "Only confirmed orders can be cancelled" });
+      return res
+        .status(400)
+        .json({ message: "Only confirmed orders can be cancelled" });
     }
 
     // Get items
@@ -203,7 +230,9 @@ exports.cancelMyOrder = async (req, res, next) => {
     }
 
     // Remove the sale record (so reports won't count it)
-    await client.query(`DELETE FROM sales_transactions WHERE order_id = $1`, [orderId]);
+    await client.query(`DELETE FROM sales_transactions WHERE order_id = $1`, [
+      orderId,
+    ]);
 
     // Mark cancelled (keep history)
     await client.query(

@@ -27,7 +27,7 @@ export default function Navbar() {
         <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-3">
           {/* Logo */}
           <Link to="/books" className="flex items-center gap-3">
-            <img src={logo} alt="Bookstore OPS" className="h-10 w-10 rounded-xl" />
+            <img src={logo} alt="Booky" className="h-10 w-10 rounded-xl" />
           </Link>
 
           {/* Navigation Pills */}
