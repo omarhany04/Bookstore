@@ -1,5 +1,3 @@
--- Demo data (enough to test every feature)
-
 -- Publishers
 INSERT INTO publishers(name, address, phone) VALUES
 ('Pearson','London, UK','+44-111-222'),

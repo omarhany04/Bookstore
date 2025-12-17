@@ -1,6 +1,4 @@
--- =========================
 -- ORDER PROCESSING SYSTEM (PostgreSQL)
--- =========================
 
 CREATE TYPE user_role AS ENUM ('ADMIN', 'CUSTOMER');
 CREATE TYPE order_status AS ENUM ('Pending', 'Confirmed', 'Cancelled');

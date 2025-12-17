@@ -25,14 +25,9 @@ export default function Navbar() {
     <header className="sticky top-0 z-50">
       <div className="border-b border-slate-200/70 bg-white/70 backdrop-blur-xl dark:border-slate-800/70 dark:bg-slate-950/70">
         <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-3">
-
           {/* Logo */}
           <Link to="/books" className="flex items-center gap-3">
-            <img
-              src={logo}
-              alt="Bookstore OPS"
-              className="h-10 w-10 rounded-xl"
-            />
+            <img src={logo} alt="Bookstore OPS" className="h-10 w-10 rounded-xl" />
           </Link>
 
           {/* Navigation Pills */}
@@ -63,11 +58,7 @@ export default function Navbar() {
           {/* Right Side */}
           <div className="flex items-center gap-2">
             {/* Dark mode toggle */}
-            <Button
-              variant="secondary"
-              onClick={toggle}
-              className="px-3"
-            >
+            <Button variant="secondary" onClick={toggle} className="px-3">
               {isDark ? "Dark" : "Light"}
             </Button>
 
@@ -87,9 +78,19 @@ export default function Navbar() {
                   className="hidden sm:flex items-center gap-2 rounded-full border border-slate-200 bg-white/60 px-3 py-2 text-sm font-semibold text-slate-700 shadow-sm transition hover:bg-white hover:shadow
                              dark:border-slate-800 dark:bg-slate-900/40 dark:text-slate-200 dark:hover:bg-slate-900/60"
                 >
-                  <span className="grid h-7 w-7 place-items-center rounded-full bg-slate-900 text-xs font-black text-white dark:bg-slate-100 dark:text-slate-900">
-                    {user.username?.slice(0, 1)?.toUpperCase()}
-                  </span>
+                  {/* ✅ Avatar (image if exists, else first letter) */}
+                  {user?.avatarUrl ? (
+                    <img
+                      src={user.avatarUrl}
+                      alt="Profile"
+                      className="h-7 w-7 rounded-full object-cover ring-1 ring-slate-200 dark:ring-slate-700"
+                    />
+                  ) : (
+                    <span className="grid h-7 w-7 place-items-center rounded-full bg-slate-900 text-xs font-black text-white dark:bg-slate-100 dark:text-slate-900">
+                      {user.username?.slice(0, 1)?.toUpperCase()}
+                    </span>
+                  )}
+
                   <span className="truncate max-w-[140px]">
                     {user.username}
                     <span className="text-slate-400"> • {user.role}</span>
