@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import Card from "../../components/ui/Card";
 import Input from "../../components/ui/Input";
@@ -11,14 +11,31 @@ export default function BrowseBooks() {
   const [rows, setRows] = useState([]);
   const [err, setErr] = useState("");
 
-  async function load(currentQ = q) {
+  // pagination
+  const pageSize = 4;
+  const [page, setPage] = useState(1);
+  const [total, setTotal] = useState(0);
+
+  const totalPages = useMemo(() => {
+    return Math.max(1, Math.ceil(Number(total || 0) / pageSize));
+  }, [total]);
+
+  async function load(currentQ = q, currentPage = page) {
     setErr("");
     try {
-      const data = await booksApi.list({
+      const data = await booksApi.listPaged({
         title: currentQ.title?.trim() || undefined,
         category: currentQ.category === "" ? undefined : currentQ.category,
+        page: currentPage,
+        pageSize,
       });
-      setRows(data);
+
+      setRows(data.items || []);
+      setTotal(Number(data.total || 0));
+
+      // if page becomes invalid after filtering, snap back to 1
+      const newTotalPages = Math.max(1, Math.ceil(Number(data.total || 0) / pageSize));
+      if (currentPage > newTotalPages) setPage(1);
     } catch (e) {
       setErr(e.message);
     }
@@ -26,24 +43,48 @@ export default function BrowseBooks() {
 
   // initial load
   useEffect(() => {
-    load(q);
+    load(q, 1);
   }, []);
 
-  // live search while typing (debounced)
+  // whenever filters change, reset page to 1 and debounce
   useEffect(() => {
-    const timer = setTimeout(() => {
-      load(q);
+    setPage(1);
+    const t = setTimeout(() => {
+      load(q, 1);
     }, 300);
-
-    return () => clearTimeout(timer);
+    return () => clearTimeout(t);
   }, [q.title, q.category]);
+
+  // when page changes, load that page
+  useEffect(() => {
+    const t = setTimeout(() => {
+      load(q, page);
+    }, 150);
+    return () => clearTimeout(t);
+  }, [page]);
+
+  // build page number buttons (max 5)
+  const pageButtons = useMemo(() => {
+    const maxBtns = 5;
+    const tp = totalPages;
+
+    if (tp <= maxBtns) return Array.from({ length: tp }, (_, i) => i + 1);
+
+    let start = Math.max(1, page - 2);
+    let end = Math.min(tp, start + maxBtns - 1);
+    start = Math.max(1, end - (maxBtns - 1));
+
+    const arr = [];
+    for (let i = start; i <= end; i++) arr.push(i);
+    return arr;
+  }, [page, totalPages]);
 
   return (
     <div className="space-y-6">
       <Card
         title="Browse books"
         right={
-          <Button variant="secondary" type="button" onClick={() => load(q)}>
+          <Button variant="secondary" type="button" onClick={() => load(q, page)}>
             Refresh
           </Button>
         }
@@ -79,7 +120,14 @@ export default function BrowseBooks() {
 
           {/* Search button */}
           <div className="flex items-end">
-            <Button type="button" className="w-full" onClick={() => load(q)}>
+            <Button
+              type="button"
+              className="w-full"
+              onClick={() => {
+                setPage(1);
+                load(q, 1);
+              }}
+            >
               Search
             </Button>
           </div>
@@ -92,8 +140,10 @@ export default function BrowseBooks() {
       <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
         {rows.map((b) => (
           <Link key={b.isbn} to={`/books/${b.isbn}`}>
-            <div className="rounded-2xl bg-white p-5 shadow-sm ring-1 ring-slate-200 hover:ring-slate-300
-                            dark:bg-slate-900 dark:ring-slate-800 dark:hover:ring-slate-700">
+            <div
+              className="rounded-2xl bg-white p-5 shadow-sm ring-1 ring-slate-200 hover:ring-slate-300
+                         dark:bg-slate-900 dark:ring-slate-800 dark:hover:ring-slate-700"
+            >
               <div className="flex items-start justify-between gap-3">
                 <div>
                   <div className="text-base font-extrabold">{b.title}</div>
@@ -114,9 +164,7 @@ export default function BrowseBooks() {
 
                   <div className="mt-2">
                     <Badge tone={b.stock_qty > 0 ? "green" : "red"}>
-                      {b.stock_qty > 0
-                        ? `In stock: ${b.stock_qty}`
-                        : "Out of stock"}
+                      {b.stock_qty > 0 ? `In stock: ${b.stock_qty}` : "Out of stock"}
                     </Badge>
                   </div>
                 </div>
@@ -129,6 +177,80 @@ export default function BrowseBooks() {
             </div>
           </Link>
         ))}
+      </div>
+
+      {/* Pagination */}
+      <div className="mt-2 flex flex-col items-center justify-center gap-3">
+        <div className="text-sm text-slate-500 dark:text-slate-300">
+          Page <span className="font-bold text-slate-900 dark:text-white">{page}</span> of{" "}
+          <span className="font-bold text-slate-900 dark:text-white">{totalPages}</span> •{" "}
+          <span className="font-bold text-slate-900 dark:text-white">{total}</span> books
+        </div>
+
+        <div className="flex flex-wrap items-center justify-center gap-3">
+          <Button
+            variant="secondary"
+            type="button"
+            onClick={() => setPage((p) => Math.max(1, p - 1))}
+            disabled={page <= 1}
+          >
+            ← Prev
+          </Button>
+
+          <div className="flex items-center gap-1 rounded-2xl bg-white p-1 ring-1 ring-slate-200 dark:bg-slate-900 dark:ring-slate-800">
+            {pageButtons[0] > 1 && (
+              <>
+                <button
+                  className="rounded-xl px-3 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-100
+                             dark:text-slate-200 dark:hover:bg-slate-800"
+                  onClick={() => setPage(1)}
+                  type="button"
+                >
+                  1
+                </button>
+                <span className="px-1 text-slate-400">…</span>
+              </>
+            )}
+
+            {pageButtons.map((p) => (
+              <button
+                key={p}
+                type="button"
+                onClick={() => setPage(p)}
+                className={`rounded-xl px-3 py-2 text-sm font-semibold transition ${
+                  p === page
+                    ? "bg-slate-900 text-white dark:bg-slate-100 dark:text-slate-900"
+                    : "text-slate-700 hover:bg-slate-100 dark:text-slate-200 dark:hover:bg-slate-800"
+                }`}
+              >
+                {p}
+              </button>
+            ))}
+
+            {pageButtons[pageButtons.length - 1] < totalPages && (
+              <>
+                <span className="px-1 text-slate-400">…</span>
+                <button
+                  className="rounded-xl px-3 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-100
+                             dark:text-slate-200 dark:hover:bg-slate-800"
+                  onClick={() => setPage(totalPages)}
+                  type="button"
+                >
+                  {totalPages}
+                </button>
+              </>
+            )}
+          </div>
+
+          <Button
+            variant="secondary"
+            type="button"
+            onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+            disabled={page >= totalPages}
+          >
+            Next →
+          </Button>
+        </div>
       </div>
     </div>
   );

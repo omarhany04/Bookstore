@@ -103,7 +103,7 @@ exports.updateStock = async (req, res, next) => {
 
 exports.listReplenishments = async (req, res, next) => {
   try {
-    const status = req.query.status; // optional
+    const status = req.query.status; 
     const params = [];
     let where = "";
     if (status) {
