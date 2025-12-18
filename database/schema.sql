@@ -31,13 +31,21 @@ CREATE TABLE authors (
   full_name VARCHAR(120) UNIQUE NOT NULL
 );
 
+-- CATEGORIES
+CREATE TABLE categories (
+  category_id SERIAL PRIMARY KEY,
+  name VARCHAR(60) UNIQUE NOT NULL
+);
+
 -- BOOKS
 CREATE TABLE books (
   isbn VARCHAR(20) PRIMARY KEY,
   title VARCHAR(200) NOT NULL,
   publication_year INT CHECK (publication_year BETWEEN 1500 AND 2100),
   selling_price NUMERIC(10,2) NOT NULL CHECK (selling_price >= 0),
-  category VARCHAR(30) NOT NULL CHECK (category IN ('Science','Art','Religion','History','Geography')),
+
+  category_id INT NOT NULL REFERENCES categories(category_id),
+
   publisher_id INT NOT NULL REFERENCES publishers(publisher_id),
   stock_qty INT NOT NULL DEFAULT 0 CHECK (stock_qty >= 0),
   threshold INT NOT NULL DEFAULT 0 CHECK (threshold >= 0),

@@ -7,6 +7,7 @@ const cartRoutes = require("./routes/cart.routes");
 const ordersRoutes = require("./routes/orders.routes");
 const adminRoutes = require("./routes/admin.routes");
 const reportsRoutes = require("./routes/reports.routes");
+const categoriesRoutes = require("./routes/categories.routes"); 
 
 const errorHandler = require("./middleware/errorHandler");
 
@@ -22,6 +23,7 @@ app.use("/api/cart", cartRoutes);
 app.use("/api/orders", ordersRoutes);
 app.use("/api/admin", adminRoutes);
 app.use("/api/reports", reportsRoutes);
+app.use("/api/categories", categoriesRoutes); 
 
 app.use(errorHandler);
 

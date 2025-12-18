@@ -8,18 +8,28 @@ exports.addBook = async (req, res, next) => {
       title: z.string().min(1),
       publication_year: z.number().int().min(1500).max(2100),
       selling_price: z.number().nonnegative(),
-      category: z.enum(["Science","Art","Religion","History","Geography"]),
+      category_id: z.number().int().positive(), 
       publisher_id: z.number().int().positive(),
       stock_qty: z.number().int().nonnegative(),
       threshold: z.number().int().nonnegative(),
-      authors: z.array(z.string().min(1)).default([]) // full names
+      authors: z.array(z.string().min(1)).default([]), // full names
     });
+
     const data = schema.parse(req.body);
 
     await db.query(
-      `INSERT INTO books(isbn,title,publication_year,selling_price,category,publisher_id,stock_qty,threshold)
+      `INSERT INTO books(isbn,title,publication_year,selling_price,category_id,publisher_id,stock_qty,threshold)
        VALUES ($1,$2,$3,$4,$5,$6,$7,$8)`,
-      [data.isbn, data.title, data.publication_year, data.selling_price, data.category, data.publisher_id, data.stock_qty, data.threshold]
+      [
+        data.isbn,
+        data.title,
+        data.publication_year,
+        data.selling_price,
+        data.category_id,
+        data.publisher_id,
+        data.stock_qty,
+        data.threshold,
+      ]
     );
 
     for (const name of data.authors) {
@@ -47,14 +57,16 @@ exports.addBook = async (req, res, next) => {
 exports.updateBook = async (req, res, next) => {
   try {
     const isbn = req.params.isbn;
+
     const schema = z.object({
       title: z.string().min(1).optional(),
       publication_year: z.number().int().min(1500).max(2100).optional(),
       selling_price: z.number().nonnegative().optional(),
-      category: z.enum(["Science","Art","Religion","History","Geography"]).optional(),
+      category_id: z.number().int().positive().optional(), 
       publisher_id: z.number().int().positive().optional(),
-      threshold: z.number().int().nonnegative().optional()
+      threshold: z.number().int().nonnegative().optional(),
     });
+
     const data = schema.parse(req.body);
 
     const r = await db.query(
@@ -62,7 +74,7 @@ exports.updateBook = async (req, res, next) => {
         title = COALESCE($1, title),
         publication_year = COALESCE($2, publication_year),
         selling_price = COALESCE($3, selling_price),
-        category = COALESCE($4, category),
+        category_id = COALESCE($4, category_id),
         publisher_id = COALESCE($5, publisher_id),
         threshold = COALESCE($6, threshold)
       WHERE isbn = $7
@@ -71,10 +83,10 @@ exports.updateBook = async (req, res, next) => {
         data.title || null,
         data.publication_year ?? null,
         data.selling_price ?? null,
-        data.category || null,
+        data.category_id ?? null,
         data.publisher_id ?? null,
         data.threshold ?? null,
-        isbn
+        isbn,
       ]
     );
 
@@ -92,7 +104,10 @@ exports.updateStock = async (req, res, next) => {
     const data = schema.parse(req.body);
 
     // Trigger will block negative
-    const r = await db.query("UPDATE books SET stock_qty=$1 WHERE isbn=$2 RETURNING isbn, stock_qty", [data.stock_qty, isbn]);
+    const r = await db.query(
+      "UPDATE books SET stock_qty=$1 WHERE isbn=$2 RETURNING isbn, stock_qty",
+      [data.stock_qty, isbn]
+    );
     if (!r.rowCount) return res.status(404).json({ message: "Book not found" });
 
     res.json(r.rows[0]);
@@ -103,7 +118,7 @@ exports.updateStock = async (req, res, next) => {
 
 exports.listReplenishments = async (req, res, next) => {
   try {
-    const status = req.query.status; 
+    const status = req.query.status;
     const params = [];
     let where = "";
     if (status) {
@@ -136,7 +151,8 @@ exports.confirmReplenishment = async (req, res, next) => {
        RETURNING repl_order_id, status`,
       [id]
     );
-    if (!r.rowCount) return res.status(404).json({ message: "Order not found or already confirmed" });
+    if (!r.rowCount)
+      return res.status(404).json({ message: "Order not found or already confirmed" });
 
     // Trigger adds stock automatically
     res.json({ ok: true });

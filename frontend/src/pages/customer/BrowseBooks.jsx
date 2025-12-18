@@ -5,11 +5,14 @@ import Input from "../../components/ui/Input";
 import Button from "../../components/ui/Button";
 import Badge from "../../components/ui/Badge";
 import { booksApi } from "../../api/books";
+import { categoriesApi } from "../../api/categories";
 
 export default function BrowseBooks() {
-  const [q, setQ] = useState({ title: "", category: "" });
+  const [q, setQ] = useState({ title: "", category_id: "" });
   const [rows, setRows] = useState([]);
   const [err, setErr] = useState("");
+
+  const [categories, setCategories] = useState([]);
 
   // pagination
   const pageSize = 4;
@@ -25,7 +28,7 @@ export default function BrowseBooks() {
     try {
       const data = await booksApi.listPaged({
         title: currentQ.title?.trim() || undefined,
-        category: currentQ.category === "" ? undefined : currentQ.category,
+        category_id: currentQ.category_id === "" ? undefined : currentQ.category_id,
         page: currentPage,
         pageSize,
       });
@@ -33,7 +36,6 @@ export default function BrowseBooks() {
       setRows(data.items || []);
       setTotal(Number(data.total || 0));
 
-      // if page becomes invalid after filtering, snap back to 1
       const newTotalPages = Math.max(1, Math.ceil(Number(data.total || 0) / pageSize));
       if (currentPage > newTotalPages) setPage(1);
     } catch (e) {
@@ -41,9 +43,17 @@ export default function BrowseBooks() {
     }
   }
 
-  // initial load
+  // initial load (books + categories)
   useEffect(() => {
-    load(q, 1);
+    (async () => {
+      try {
+        const cats = await categoriesApi.list();
+        setCategories(cats);
+      } catch (e) {
+        console.error(e);
+      }
+      load({ title: "", category_id: "" }, 1);
+    })();
   }, []);
 
   // whenever filters change, reset page to 1 and debounce
@@ -53,7 +63,7 @@ export default function BrowseBooks() {
       load(q, 1);
     }, 300);
     return () => clearTimeout(t);
-  }, [q.title, q.category]);
+  }, [q.title, q.category_id]);
 
   // when page changes, load that page
   useEffect(() => {
@@ -106,15 +116,15 @@ export default function BrowseBooks() {
             <select
               className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm
                          dark:border-slate-800 dark:bg-slate-950 dark:text-slate-100"
-              value={q.category}
-              onChange={(e) => setQ({ ...q, category: e.target.value })}
+              value={q.category_id}
+              onChange={(e) => setQ({ ...q, category_id: e.target.value })}
             >
               <option value="">All</option>
-              <option value="Science">Science</option>
-              <option value="Art">Art</option>
-              <option value="Religion">Religion</option>
-              <option value="History">History</option>
-              <option value="Geography">Geography</option>
+              {categories.map((c) => (
+                <option key={c.category_id} value={String(c.category_id)}>
+                  {c.name}
+                </option>
+              ))}
             </select>
           </label>
 

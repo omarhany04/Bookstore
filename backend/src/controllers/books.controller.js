@@ -13,10 +13,12 @@ function buildWhere(q) {
     clauses.push(`b.title ILIKE $${i++}`);
     params.push(`%${q.title}%`);
   }
-  if (q.category) {
-    clauses.push(`b.category = $${i++}`);
-    params.push(q.category);
+
+  if (q.category_id) {
+    clauses.push(`b.category_id = $${i++}`);
+    params.push(Number(q.category_id));
   }
+
   if (q.publisher) {
     clauses.push(`p.name ILIKE $${i++}`);
     params.push(`%${q.publisher}%`);
@@ -34,21 +36,20 @@ exports.listBooks = async (req, res, next) => {
   try {
     const { where, params } = buildWhere(req.query);
 
-    // If page/pageSize exist => return paginated response. Otherwise keep old behavior (array).
     const wantsPaging =
       req.query.page !== undefined || req.query.pageSize !== undefined;
 
     const page = Math.max(1, Number(req.query.page || 1));
     const pageSizeRaw = Number(req.query.pageSize || 4);
-    const pageSize = Math.min(50, Math.max(1, pageSizeRaw)); // safety cap
+    const pageSize = Math.min(50, Math.max(1, pageSizeRaw));
     const offset = (page - 1) * pageSize;
 
     if (wantsPaging) {
-      // total count (distinct books)
       const countSql = `
         SELECT COUNT(DISTINCT b.isbn)::int AS total
         FROM books b
         JOIN publishers p ON p.publisher_id = b.publisher_id
+        JOIN categories c ON c.category_id = b.category_id
         LEFT JOIN book_authors ba ON ba.isbn = b.isbn
         LEFT JOIN authors a ON a.author_id = ba.author_id
         ${where};
@@ -56,14 +57,14 @@ exports.listBooks = async (req, res, next) => {
       const countRes = await db.query(countSql, params);
       const total = Number(countRes.rows[0]?.total || 0);
 
-      // items page
       const itemsSql = `
         SELECT
           b.isbn,
           b.title,
           b.publication_year,
           b.selling_price,
-          b.category,
+          b.category_id,
+          c.name AS category,
           b.stock_qty,
           b.threshold,
           p.name AS publisher,
@@ -73,10 +74,11 @@ exports.listBooks = async (req, res, next) => {
           ) AS authors
         FROM books b
         JOIN publishers p ON p.publisher_id = b.publisher_id
+        JOIN categories c ON c.category_id = b.category_id
         LEFT JOIN book_authors ba ON ba.isbn = b.isbn
         LEFT JOIN authors a ON a.author_id = ba.author_id
         ${where}
-        GROUP BY b.isbn, p.name
+        GROUP BY b.isbn, p.name, c.name
         ORDER BY b.title ASC
         LIMIT $${params.length + 1}
         OFFSET $${params.length + 2};
@@ -91,14 +93,14 @@ exports.listBooks = async (req, res, next) => {
       });
     }
 
-    // old behavior (no pagination params): return full array
     const sql = `
       SELECT
         b.isbn,
         b.title,
         b.publication_year,
         b.selling_price,
-        b.category,
+        b.category_id,
+        c.name AS category,
         b.stock_qty,
         b.threshold,
         p.name AS publisher,
@@ -108,10 +110,11 @@ exports.listBooks = async (req, res, next) => {
         ) AS authors
       FROM books b
       JOIN publishers p ON p.publisher_id = b.publisher_id
+      JOIN categories c ON c.category_id = b.category_id
       LEFT JOIN book_authors ba ON ba.isbn = b.isbn
       LEFT JOIN authors a ON a.author_id = ba.author_id
       ${where}
-      GROUP BY b.isbn, p.name
+      GROUP BY b.isbn, p.name, c.name
       ORDER BY b.title ASC;
     `;
 
@@ -131,7 +134,8 @@ exports.getBook = async (req, res, next) => {
         b.title,
         b.publication_year,
         b.selling_price,
-        b.category,
+        b.category_id,
+        c.name AS category,
         b.stock_qty,
         b.threshold,
         p.publisher_id,
@@ -144,10 +148,11 @@ exports.getBook = async (req, res, next) => {
         ) AS authors
       FROM books b
       JOIN publishers p ON p.publisher_id = b.publisher_id
+      JOIN categories c ON c.category_id = b.category_id
       LEFT JOIN book_authors ba ON ba.isbn = b.isbn
       LEFT JOIN authors a ON a.author_id = ba.author_id
       WHERE b.isbn = $1
-      GROUP BY b.isbn, p.publisher_id, p.name, p.address, p.phone;
+      GROUP BY b.isbn, p.publisher_id, p.name, p.address, p.phone, c.name;
     `;
     const r = await db.query(sql, [isbn]);
     if (!r.rowCount) return res.status(404).json({ message: "Book not found" });

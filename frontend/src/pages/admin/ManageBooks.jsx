@@ -7,6 +7,7 @@ import Modal from "../../components/ui/Modal";
 import { booksApi } from "../../api/books";
 import { apiFetch } from "../../api/client";
 import { useAuth } from "../../context/AuthContext";
+import { categoriesApi } from "../../api/categories";
 
 export default function ManageBooks() {
   const { token } = useAuth();
@@ -14,10 +15,18 @@ export default function ManageBooks() {
   const [open, setOpen] = useState(false);
   const [err, setErr] = useState("");
 
+  const [categories, setCategories] = useState([]);
+
   const [form, setForm] = useState({
-    isbn: "", title: "", publication_year: 2020, selling_price: 100,
-    category: "Science", publisher_id: 1, stock_qty: 10, threshold: 5,
-    authorsText: ""
+    isbn: "",
+    title: "",
+    publication_year: 2020,
+    selling_price: 100,
+    category_id: "",
+    publisher_id: 1,
+    stock_qty: 10,
+    threshold: 5,
+    authorsText: "",
   });
 
   async function load() {
@@ -30,12 +39,33 @@ export default function ManageBooks() {
     }
   }
 
-  useEffect(() => { load(); }, []);
+  async function loadCategories() {
+    try {
+      const cats = await categoriesApi.list();
+      setCategories(cats);
+
+      // set default category_id if empty
+      if (!form.category_id && cats.length) {
+        setForm((f) => ({ ...f, category_id: String(cats[0].category_id) }));
+      }
+    } catch (e) {
+      console.error(e);
+    }
+  }
+
+  useEffect(() => {
+    loadCategories();
+    load();
+  }, []);
 
   async function addBook() {
     setErr("");
     try {
-      const authors = form.authorsText.split(",").map(s => s.trim()).filter(Boolean);
+      const authors = form.authorsText
+        .split(",")
+        .map((s) => s.trim())
+        .filter(Boolean);
+
       await apiFetch("/admin/books", {
         method: "POST",
         token,
@@ -44,13 +74,14 @@ export default function ManageBooks() {
           title: form.title,
           publication_year: Number(form.publication_year),
           selling_price: Number(form.selling_price),
-          category: form.category,
+          category_id: Number(form.category_id),
           publisher_id: Number(form.publisher_id),
           stock_qty: Number(form.stock_qty),
           threshold: Number(form.threshold),
-          authors
-        }
+          authors,
+        },
       });
+
       setOpen(false);
       await load();
     } catch (e) {
@@ -61,7 +92,7 @@ export default function ManageBooks() {
   const columns = [
     { key: "title", header: "Title" },
     { key: "isbn", header: "ISBN" },
-    { key: "category", header: "Category" },
+    { key: "category", header: "Category" }, 
     { key: "publisher", header: "Publisher" },
     { key: "stock_qty", header: "Stock" },
     { key: "threshold", header: "Threshold" },
@@ -69,10 +100,7 @@ export default function ManageBooks() {
 
   return (
     <div className="space-y-6">
-      <Card
-        title="Manage Books"
-        right={<Button onClick={() => setOpen(true)}>Add book</Button>}
-      >
+      <Card title="Manage Books" right={<Button onClick={() => setOpen(true)}>Add book</Button>}>
         {err && <div className="mb-3 text-sm text-red-600">{err}</div>}
         <Table columns={columns} rows={rows} keyField="isbn" />
         <div className="mt-3 text-xs text-slate-500">
@@ -82,26 +110,69 @@ export default function ManageBooks() {
 
       <Modal open={open} title="Add New Book" onClose={() => setOpen(false)}>
         <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
-          <Input label="ISBN" value={form.isbn} onChange={(e)=>setForm({...form, isbn:e.target.value})} />
-          <Input label="Title" value={form.title} onChange={(e)=>setForm({...form, title:e.target.value})} />
-          <Input label="Publication year" type="number" value={form.publication_year} onChange={(e)=>setForm({...form, publication_year:e.target.value})} />
-          <Input label="Price" type="number" value={form.selling_price} onChange={(e)=>setForm({...form, selling_price:e.target.value})} />
+          <Input label="ISBN" value={form.isbn} onChange={(e) => setForm({ ...form, isbn: e.target.value })} />
+          <Input label="Title" value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} />
+          <Input
+            label="Publication year"
+            type="number"
+            value={form.publication_year}
+            onChange={(e) => setForm({ ...form, publication_year: e.target.value })}
+          />
+          <Input
+            label="Price"
+            type="number"
+            value={form.selling_price}
+            onChange={(e) => setForm({ ...form, selling_price: e.target.value })}
+          />
+
+          {/* Category dropdown from DB */}
           <label className="block">
             <span className="mb-1 block text-sm font-medium text-slate-700">Category</span>
-            <select className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm"
-              value={form.category} onChange={(e)=>setForm({...form, category:e.target.value})}>
-              {["Science","Art","Religion","History","Geography"].map(c => <option key={c} value={c}>{c}</option>)}
+            <select
+              className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm"
+              value={form.category_id}
+              onChange={(e) => setForm({ ...form, category_id: e.target.value })}
+            >
+              {categories.map((c) => (
+                <option key={c.category_id} value={String(c.category_id)}>
+                  {c.name}
+                </option>
+              ))}
             </select>
           </label>
-          <Input label="Publisher ID" type="number" value={form.publisher_id} onChange={(e)=>setForm({...form, publisher_id:e.target.value})} />
-          <Input label="Stock quantity" type="number" value={form.stock_qty} onChange={(e)=>setForm({...form, stock_qty:e.target.value})} />
-          <Input label="Threshold" type="number" value={form.threshold} onChange={(e)=>setForm({...form, threshold:e.target.value})} />
+
+          <Input
+            label="Publisher ID"
+            type="number"
+            value={form.publisher_id}
+            onChange={(e) => setForm({ ...form, publisher_id: e.target.value })}
+          />
+          <Input
+            label="Stock quantity"
+            type="number"
+            value={form.stock_qty}
+            onChange={(e) => setForm({ ...form, stock_qty: e.target.value })}
+          />
+          <Input
+            label="Threshold"
+            type="number"
+            value={form.threshold}
+            onChange={(e) => setForm({ ...form, threshold: e.target.value })}
+          />
           <div className="md:col-span-2">
-            <Input label="Authors (comma-separated)" value={form.authorsText} onChange={(e)=>setForm({...form, authorsText:e.target.value})} placeholder="e.g. Author One, Author Two" />
+            <Input
+              label="Authors (comma-separated)"
+              value={form.authorsText}
+              onChange={(e) => setForm({ ...form, authorsText: e.target.value })}
+              placeholder="e.g. Author One, Author Two"
+            />
           </div>
         </div>
+
         <div className="mt-4">
-          <Button className="w-full" onClick={addBook}>Create</Button>
+          <Button className="w-full" onClick={addBook}>
+            Create
+          </Button>
         </div>
       </Modal>
     </div>

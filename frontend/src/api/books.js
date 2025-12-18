@@ -7,8 +7,9 @@ function buildParams(q = {}) {
     params.set("title", String(q.title).trim());
   }
 
-  if (q.category !== undefined && q.category !== null && String(q.category).trim() !== "") {
-    params.set("category", String(q.category).trim());
+  // category_id 
+  if (q.category_id !== undefined && q.category_id !== null && String(q.category_id).trim() !== "") {
+    params.set("category_id", String(q.category_id).trim());
   }
 
   // pagination
@@ -19,13 +20,11 @@ function buildParams(q = {}) {
 }
 
 export const booksApi = {
-  // old behavior: returns array (no paging params)
   list: (q = {}) => {
-    const params = buildParams({ title: q.title, category: q.category });
+    const params = buildParams({ title: q.title, category_id: q.category_id });
     return apiFetch(`/books${params ? `?${params}` : ""}`);
   },
 
-  // new behavior: returns { items, total, page, pageSize }
   listPaged: (q = {}) => {
     const params = buildParams(q);
     return apiFetch(`/books${params ? `?${params}` : ""}`);
