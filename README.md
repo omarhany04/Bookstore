@@ -1,38 +1,146 @@
-<h1>
+# 📚 Booky – Online Bookstore Order Processing System
+       
+Booky is a **full-stack, containerized Order Processing System** for an online bookstore.  
+It manages the **entire lifecycle of book sales** — from customer browsing and checkout to administrative inventory control, automated stock replenishment, and business analytics.
+
+The system is built using a modern **PERN stack** (**PostgreSQL, Express, React, Node.js**) and orchestrated with **Docker Compose** for seamless deployment.
+
+---
+
+## 🚀 Tech Stack
+
+### Backend
+- **Node.js + Express**
+- **PostgreSQL**
+- **JWT Authentication**
+- **Role-Based Access Control (RBAC)**
+- **Database Triggers & Stored Logic**
+
+### Frontend
+- **React (Vite)**
+- **Tailwind CSS**
+- **Context API (Auth & Theme)**
+- **Dark / Light Mode**
+
+### DevOps & Infrastructure
+- **Docker & Docker Compose**
+- **PostgreSQL Database Containers**
+- **AI Service (Ollama – Llama 3.2)**
+
+---
+
+## ✨ Key Features
+
+## 1️⃣ Customer Experience
+
+### 🔍 Smart Browsing & Search
+- Browse books with **pagination** for performance.
+- Filter by **title** or **category**.
+- View detailed book information.
+
+### 🛒 Shopping Cart System
+- Persistent shopping cart.
+- Quantity adjustment with **real-time stock validation**.
+- Prevents adding items beyond available warehouse stock.
+
+### 💳 Flexible Checkout
+- **Credit/Debit Card** payments with **Luhn Algorithm validation**.
+- **Cash on Delivery (COD)** option.
+- Secure order confirmation flow.
+
+### 📦 Order Management
+- View complete **order history**.
+- Cancel orders in **Confirmed** status.
+- Automatic **stock restoration** when an order is canceled.
+
+### 👤 User Profiles
+- Update personal information.
+- Manage shipping addresses.
+- Upload or change **profile avatars** (stored locally).
+
+---
+
+## 2️⃣ Administrative & Inventory Control
+
+### 🔐 Role-Based Access Control (RBAC)
+- Separate **ADMIN** and **CUSTOMER** roles.
+- Protected backend routes and frontend views.
+
+### 📘 Book Management
+- Add, edit, and delete books.
+- Manage **authors**, **publishers**, and **categories**.
+- Control pricing and stock levels.
+
+### 🔄 Automated Stock Replenishment (Core Feature)
+- When a book’s stock drops below a defined **threshold**:
+  - A **PostgreSQL trigger** automatically creates a **replenishment order**.
+- Ensures stock consistency and zero downtime.
+
+### ✅ Replenishment Confirmation
+- Admins review replenishment orders.
+- Upon confirmation:
+  - A second **database trigger** automatically increases stock.
+- All logic handled at the database level for **maximum integrity**.
+
+---
+
+## 3️⃣ Business Intelligence & Reporting
+
+An advanced **Admin Reporting Dashboard** provides actionable insights:
+
+### 📊 Sales Analytics
+- Total sales for:
+  - Previous month
+  - Any specific calendar day
+
+### 🏆 Top Performers
+- **Top 5 customers** by total spending.
+- **Top 10 best-selling books** over the last 3 months.
+
+### 📦 Inventory Health
+- Track how many times each book required replenishment.
+- Identify high-demand or low-stock-risk items.
+
+---
+
+## 4️⃣ 🤖 AI-Powered Assistance
+
+### Booky Assistant
+- Integrated **book-focused AI chatbot** powered by **Ollama (Llama 3.2)**.
+- Designed specifically for bookstore-related interactions:
+  - Book recommendations
+  - Category explanations
+  - Browsing and checkout guidance
+  - Admin workflow assistance
+- The chatbot does **not** answer general or unrelated questions.
+
+---
+
+## 🛠 Technical Highlights
+
+- **Database Triggers**
+  - Prevent negative stock.
+  - Automate replenishment and stock updates.
+- **High Data Integrity**
+  - Business logic enforced at the database level.
+- **Responsive UI**
+  - Built with Tailwind CSS.
+  - Fully supports **Dark Mode & Light Mode**.
+- **Containerized Architecture**
+  - Backend, frontend, database, and AI service run with a single command.
+
+---
+       
+## 🐳 Running the Project (Docker)
+
+```bash
+docker compose up --build
+```
+---
+<div align="center">
   <img src="https://i.ibb.co/pv1wBhD2/Booky-Logo.jpg"
        alt="Project Logo"
-       height="75"
-       style="vertical-align: middle; margin-right: 12px;" />
-  Order Processing System 
-</h1>
+       height="100" />
+</div>
 
-The **Order Processing System** is a full-stack bookstore application that handles online book browsing, purchasing, and inventory management. Customers can search for books, manage a shopping cart, place orders, and view their order history, while administrators can manage books, monitor stock levels, confirm replenishment orders, and generate sales reports.
-
-The backend is built with **Node.js, Express, and PostgreSQL**, using JWT-based authentication and role-based access control. Core business rules such as stock validation and automatic replenishment are enforced at the database level. The frontend is developed using **React, Vite, and Tailwind CSS**, and the entire system is containerized with **Docker Compose** for easy setup and deployment.
-
-## Tech Stack
-- Frontend: React + Vite + Tailwind CSS
-- Backend: Node.js + Express
-- Database: PostgreSQL (use pgAdmin 4 to inspect)
-
-## Quick Start (Docker)
-1. Install Docker Desktop
-2. From the repo root:
-   ```bash
-   docker compose up --build
-   ```
-3. Open:
-   - Frontend: http://localhost:5173
-   - Backend health: http://localhost:5000/health
-
-## Default Demo Accounts
-- Admin:
-  - username: `admin`
-  - password: `admin123`
-- Customer:
-  - username: `sara`
-  - password: `sara123`
-
-## Notes
-- Stock constraints + auto replenishment triggers are implemented in `database/schema.sql`.
-- Reports are under Admin → Reports.
+---

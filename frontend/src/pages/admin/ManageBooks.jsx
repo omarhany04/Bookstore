@@ -127,9 +127,9 @@ export default function ManageBooks() {
 
           {/* Category dropdown from DB */}
           <label className="block">
-            <span className="mb-1 block text-sm font-medium text-slate-700">Category</span>
+            <span className="mb-1 block text-sm font-medium text-slate-700 dark:text-slate-200">Category</span>
             <select
-              className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm"
+              className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm outline-none focus:border-slate-400 dark:border-slate-800 dark:bg-slate-950 dark:text-slate-100 dark:focus:border-slate-600"
               value={form.category_id}
               onChange={(e) => setForm({ ...form, category_id: e.target.value })}
             >

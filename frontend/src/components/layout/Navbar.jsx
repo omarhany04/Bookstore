@@ -36,6 +36,10 @@ export default function Navbar() {
               Books
             </NavLink>
 
+            <NavLink to="/quizzes" className={navLinkClass}>
+              Quizzes
+            </NavLink>
+
             {isAuthed && (
               <NavLink to="/cart" className={navLinkClass}>
                 Cart
@@ -47,7 +51,7 @@ export default function Navbar() {
                 Orders
               </NavLink>
             )}
-
+            
             {user?.role === "ADMIN" && (
               <NavLink to="/admin/dashboard" className={navLinkClass}>
                 Admin

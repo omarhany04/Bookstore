@@ -4,6 +4,7 @@ import Sidebar from "./components/layout/Sidebar.jsx";
 import ProtectedRoute from "./components/layout/ProtectedRoute.jsx";
 import Footer from "./components/layout/Footer.jsx";
 import BookyAssistant from "./components/BookyAssistant.jsx";
+import ReadingQuiz from "./pages/quizzes/ReadingQuiz.jsx";
 
 import Login from "./pages/auth/Login.jsx";
 import Register from "./pages/auth/Register.jsx";
@@ -41,6 +42,8 @@ export default function App() {
           <Route path="/shipping" element={<Shipping />} />
           <Route path="/privacy" element={<Privacy />} />
           <Route path="/support" element={<Support />} />
+          
+          <Route path="/quizzes" element={<ReadingQuiz />} />
 
           {/* Customer */}
           <Route path="/books" element={<BrowseBooks />} />

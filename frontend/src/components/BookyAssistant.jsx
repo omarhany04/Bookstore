@@ -150,16 +150,16 @@ export default function BookyAssistant() {
         <motion.div
           initial={{ opacity: 0, y: 18 }}
           animate={{ opacity: 1, y: 0 }}
-          className="fixed bottom-5 right-5 flex h-[420px] w-[360px] max-w-[92vw] flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-2xl"
+          className="fixed bottom-5 right-5 flex h-[420px] w-[360px] max-w-[92vw] flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-2xl dark:border-slate-800 dark:bg-slate-950"
         >
           {/* Header */}
-          <div className="flex items-center justify-between border-b border-slate-200 px-4 py-3">
+          <div className="flex items-center justify-between border-b border-slate-200 px-4 py-3 dark:border-slate-800">
             <div className="flex items-center gap-2">
-              <span className="grid h-9 w-9 place-items-center rounded-xl bg-slate-900 text-white">
+              <span className="grid h-9 w-9 place-items-center rounded-xl bg-slate-900 text-white dark:bg-slate-100 dark:text-slate-900">
                 <Bot size={18} />
               </span>
               <div>
-                <div className="text-sm font-extrabold text-slate-900">Booky Assistant</div>
+                <div className="text-sm font-extrabold text-slate-900 dark:text-white">Booky Assistant</div>
                 <div className="text-xs text-slate-500">Powered by Ollama</div>
               </div>
             </div>
@@ -178,11 +178,11 @@ export default function BookyAssistant() {
               return (
                 <div
                   key={idx}
-                  className={`max-w-[85%] rounded-2xl px-3 py-2 text-sm leading-relaxed ${
+                    className={`max-w-[85%] rounded-2xl px-3 py-2 text-sm leading-relaxed ${
                     m.role === "user"
-                      ? "ml-auto bg-slate-900 text-white"
-                      : "bg-slate-100 text-slate-900"
-                  }`}
+                        ? "ml-auto bg-slate-900 text-white dark:bg-slate-100 dark:text-slate-900"
+                        : "bg-slate-100 text-slate-900 dark:bg-slate-900 dark:text-slate-100"
+                    }`}
                 >
                   {showTyping ? displayedText : m.content}
                 </div>
@@ -199,10 +199,10 @@ export default function BookyAssistant() {
           </div>
 
           {/* Input */}
-          <div className="border-t border-slate-200 p-3">
+          <div className="border-t border-slate-200 p-3 dark:border-slate-800">
             <div className="flex items-center gap-2">
               <input
-                className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm outline-none focus:border-slate-400"
+                className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm outline-none focus:border-slate-400 dark:border-slate-800 dark:bg-slate-900 dark:text-white"
                 placeholder="Ask about books, cart, checkout..."
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
