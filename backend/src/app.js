@@ -9,7 +9,10 @@ const adminRoutes = require("./routes/admin.routes");
 const reportsRoutes = require("./routes/reports.routes");
 const categoriesRoutes = require("./routes/categories.routes"); 
 
+const chatRoutes = require("./routes/chat.routes");
+
 const errorHandler = require("./middleware/errorHandler");
+
 
 const app = express();
 app.use(cors());
@@ -24,6 +27,8 @@ app.use("/api/orders", ordersRoutes);
 app.use("/api/admin", adminRoutes);
 app.use("/api/reports", reportsRoutes);
 app.use("/api/categories", categoriesRoutes); 
+
+app.use("/api/chat", chatRoutes);
 
 app.use(errorHandler);
 

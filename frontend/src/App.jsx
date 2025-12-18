@@ -3,6 +3,7 @@ import Navbar from "./components/layout/Navbar.jsx";
 import Sidebar from "./components/layout/Sidebar.jsx";
 import ProtectedRoute from "./components/layout/ProtectedRoute.jsx";
 import Footer from "./components/layout/Footer.jsx";
+import BookyAssistant from "./components/BookyAssistant.jsx";
 
 import Login from "./pages/auth/Login.jsx";
 import Register from "./pages/auth/Register.jsx";
@@ -75,6 +76,7 @@ export default function App() {
 
           <Route path="*" element={<div className="p-6">Not found</div>} />
         </Routes>
+        <BookyAssistant />
       </div>
       <Footer />
     </div>
