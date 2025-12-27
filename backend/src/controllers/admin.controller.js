@@ -65,6 +65,7 @@ exports.updateBook = async (req, res, next) => {
       category_id: z.number().int().positive().optional(), 
       publisher_id: z.number().int().positive().optional(),
       threshold: z.number().int().nonnegative().optional(),
+      stock_qty: z.number().int().nonnegative().optional(), 
     });
 
     const data = schema.parse(req.body);
@@ -76,8 +77,9 @@ exports.updateBook = async (req, res, next) => {
         selling_price = COALESCE($3, selling_price),
         category_id = COALESCE($4, category_id),
         publisher_id = COALESCE($5, publisher_id),
-        threshold = COALESCE($6, threshold)
-      WHERE isbn = $7
+        threshold = COALESCE($6, threshold),
+        stock_qty = COALESCE($7, stock_qty) 
+      WHERE isbn = $8
       RETURNING isbn`,
       [
         data.title || null,
@@ -86,7 +88,8 @@ exports.updateBook = async (req, res, next) => {
         data.category_id ?? null,
         data.publisher_id ?? null,
         data.threshold ?? null,
-        isbn,
+        data.stock_qty ?? null, 
+        isbn,                  
       ]
     );
 

@@ -31,4 +31,11 @@ export const booksApi = {
   },
 
   get: (isbn) => apiFetch(`/books/${isbn}`),
+  
+  update: (token, isbn, payload) => 
+    apiFetch(`/admin/books/${isbn}`, { 
+      method: "PATCH", 
+      token, 
+      body: payload 
+    }),
 };
