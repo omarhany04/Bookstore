@@ -26,7 +26,7 @@ export default function Login() {
   }
 
   return (
-    <div className="mx-auto max-w-md">
+    <div className="mx-auto max-w-md text-base">
       <Card title="Login">
         <form onSubmit={submit} className="space-y-3">
           <Input label="Username" value={username} onChange={(e) => setUsername(e.target.value)} />
@@ -34,8 +34,24 @@ export default function Login() {
           {err && <div className="text-sm text-red-600">{err}</div>}
           <Button className="w-full" type="submit">Login</Button>
         </form>
-        <div className="mt-4 text-sm text-slate-600">
-          No account? <Link className="font-semibold text-slate-900" to="/register">Create one</Link>
+        <div className="mt-6 flex items-center gap-3">
+          <span className="text-base text-slate-400">
+            No account?
+          </span>
+          <Link
+          to="/register"
+          className="
+            inline-flex items-center justify-center
+            rounded-full
+            px-4 py-1.5
+            text-sm font-semibold
+            transition
+            bg-slate-900 text-white hover:bg-slate-800
+            dark:bg-slate-100 dark:text-slate-900 dark:hover:bg-white
+          "
+        >
+          Create one
+        </Link>
         </div>
       </Card>
     </div>

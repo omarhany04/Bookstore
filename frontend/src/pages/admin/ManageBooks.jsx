@@ -57,15 +57,15 @@ export default function ManageBooks() {
     load();
   }, []);
 
-  // Open modal for a new book
   const handleAddNew = () => {
+    setErr("");
     setEditingIsbn(null);
     setForm(initialForm);
     setOpen(true);
   };
 
-  // Open modal for editing
   const handleEdit = (book) => {
+    setErr("");
     setEditingIsbn(book.isbn);
     setForm({
       isbn: book.isbn,
@@ -98,14 +98,12 @@ export default function ManageBooks() {
       };
 
       if (editingIsbn) {
-        // CALL UPDATE (PATCH)
         await apiFetch(`/admin/books/${editingIsbn}`, {
           method: "PATCH",
           token,
           body: payload,
         });
       } else {
-        // CALL ADD (POST)
         await apiFetch("/admin/books", {
           method: "POST",
           token,
@@ -116,7 +114,17 @@ export default function ManageBooks() {
       setOpen(false);
       await load();
     } catch (e) {
-      setErr(e.message);
+      // TRY TO PARSE ZOD ERROR JSON INTO TEXT
+      try {
+        const parsed = JSON.parse(e.message);
+        if (Array.isArray(parsed)) {
+          setErr(parsed[0].message); // Shows "Number must be greater than or equal to 0"
+        } else {
+          setErr(e.message);
+        }
+      } catch {
+        setErr(e.message);
+      }
     }
   }
 
@@ -139,7 +147,7 @@ export default function ManageBooks() {
   return (
     <div className="space-y-6">
       <Card title="Manage Books" right={<Button onClick={handleAddNew}>Add book</Button>}>
-        {err && <div className="mb-3 text-sm text-red-600">{err}</div>}
+        {err && <div className="mb-3 text-sm font-bold text-red-600">{err}</div>}
         <Table columns={columns} rows={rows} keyField="isbn" />
       </Card>
 
@@ -148,16 +156,33 @@ export default function ManageBooks() {
           <Input 
             label="ISBN" 
             value={form.isbn} 
-            disabled={!!editingIsbn} // ISBN usually shouldn't change
+            disabled={!!editingIsbn} 
             onChange={(e) => setForm({ ...form, isbn: e.target.value })} 
           />
-          <Input label="Title" value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} />
-          {/* ... Keep all other Inputs (price, year, etc.) exactly as you had them ... */}
+          <Input 
+            label="Title" 
+            value={form.title} 
+            onChange={(e) => setForm({ ...form, title: e.target.value })} 
+          />
+          
+          <Input 
+            label="Publication Year" 
+            type="number" 
+            value={form.publication_year} 
+            onChange={(e) => setForm({ ...form, publication_year: e.target.value })} 
+          />
+          
+          <Input 
+            label="Selling Price" 
+            type="number" 
+            value={form.selling_price} 
+            onChange={(e) => setForm({ ...form, selling_price: e.target.value })} 
+          />
           
           <label className="block">
             <span className="mb-1 block text-sm font-medium text-slate-700 dark:text-slate-200">Category</span>
             <select
-              className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm outline-none dark:bg-slate-950"
+              className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm outline-none dark:bg-slate-950 dark:border-slate-800"
               value={form.category_id}
               onChange={(e) => setForm({ ...form, category_id: e.target.value })}
             >
@@ -167,13 +192,35 @@ export default function ManageBooks() {
             </select>
           </label>
           
-          {/* Include Stock Qty Input only if NOT editing, or use the specialized stock update logic */}
+          <Input 
+            label="Publisher ID" 
+            type="number" 
+            value={form.publisher_id} 
+            onChange={(e) => setForm({ ...form, publisher_id: e.target.value })} 
+          />
+
           <Input 
             label="Stock quantity" 
             type="number" 
             value={form.stock_qty} 
             onChange={(e) => setForm({ ...form, stock_qty: e.target.value })} 
           />
+
+          <Input 
+            label="Threshold" 
+            type="number" 
+            value={form.threshold} 
+            onChange={(e) => setForm({ ...form, threshold: e.target.value })} 
+          />
+
+          <div className="md:col-span-2">
+            <Input 
+              label="Authors (comma-separated)" 
+              value={form.authorsText} 
+              placeholder="Author 1, Author 2"
+              onChange={(e) => setForm({ ...form, authorsText: e.target.value })} 
+            />
+          </div>
         </div>
 
         <div className="mt-4">

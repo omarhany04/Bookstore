@@ -46,9 +46,24 @@ export default function Register() {
             <Button className="w-full" type="submit">Sign up</Button>
           </div>
         </form>
-
-        <div className="mt-4 text-sm text-slate-600">
-          Already have an account? <Link className="font-semibold text-slate-900" to="/login">Login</Link>
+        <div className="mt-6 flex items-center gap-3">
+          <span className="text-base text-slate-400">
+            Already have an account?
+          </span>
+          <Link
+            to="/login"
+            className="
+              inline-flex items-center justify-center
+              rounded-full
+              px-4 py-1.5
+              text-sm font-semibold
+              transition
+              bg-slate-900 text-white hover:bg-slate-800
+              dark:bg-slate-100 dark:text-slate-900 dark:hover:bg-white
+            "
+          >
+            Login
+          </Link>
         </div>
       </Card>
     </div>
