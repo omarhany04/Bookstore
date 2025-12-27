@@ -8,7 +8,7 @@ import { booksApi } from "../../api/books";
 import { categoriesApi } from "../../api/categories";
 
 export default function BrowseBooks() {
-  // Consolidate ISBN, Title, Author, and Publisher into a single search string
+  // Requirement: One search bar for ISBN, Title, Author, and Publisher
   const [q, setQ] = useState({ 
     search: "", 
     category_id: "" 
@@ -27,7 +27,7 @@ export default function BrowseBooks() {
     return Math.max(1, Math.ceil(Number(total || 0) / pageSize));
   }, [total]);
 
-  // Updated load function to pass the global search term
+  // Load function using the consolidated search term
   async function load(currentQ = q, currentPage = page) {
     setErr("");
     try {
@@ -61,7 +61,7 @@ export default function BrowseBooks() {
     })();
   }, []);
 
-  // Debounced live search when text or category changes
+  // Live searching: triggers when user types or changes category
   useEffect(() => {
     setPage(1);
     const t = setTimeout(() => {
@@ -70,7 +70,7 @@ export default function BrowseBooks() {
     return () => clearTimeout(t);
   }, [q.search, q.category_id]);
 
-  // Page change effect
+  // Page change handler
   useEffect(() => {
     const t = setTimeout(() => {
       load(q, page);
@@ -101,7 +101,7 @@ export default function BrowseBooks() {
         }
       >
         <div className="flex flex-col gap-4 md:flex-row md:items-end">
-          {/* SINGLE GLOBAL SEARCH BAR */}
+          {/* THE SINGLE SEARCH BAR */}
           <div className="flex-1">
             <Input
               label="Global Search"
@@ -111,7 +111,6 @@ export default function BrowseBooks() {
             />
           </div>
 
-          {/* CATEGORY FILTER */}
           <div className="w-full md:w-64">
             <label className="block">
               <span className="mb-1 block text-sm font-medium text-slate-700 dark:text-slate-200">
@@ -160,10 +159,10 @@ export default function BrowseBooks() {
             >
               <div className="flex items-start justify-between gap-3">
                 <div className="space-y-1">
-                  <div className="text-base font-extrabold">{b.title}</div>
+                  <div className="text-base font-extrabold text-slate-900 dark:text-white">{b.title}</div>
                   <div className="text-xs text-slate-500">ISBN: {b.isbn}</div>
                   <div className="text-sm text-slate-600 dark:text-slate-300">
-                    <span className="font-semibold text-slate-900 dark:text-white">By:</span> {(b.authors || []).join(", ")}
+                    <span className="font-semibold">By:</span> {(b.authors || []).join(", ")}
                   </div>
                   <div className="text-xs italic text-slate-500">
                     {b.publisher}
@@ -171,7 +170,7 @@ export default function BrowseBooks() {
                 </div>
 
                 <div className="text-right">
-                  <div className="text-lg font-black">
+                  <div className="text-lg font-black text-slate-900 dark:text-white">
                     {Number(b.selling_price).toFixed(2)} EGP
                   </div>
                   <div className="mt-2">
@@ -182,9 +181,10 @@ export default function BrowseBooks() {
                 </div>
               </div>
 
+              {/* THRESHOLD RESTORED HERE */}
               <div className="mt-4 flex items-center justify-between text-xs text-slate-500 dark:text-slate-400 border-t border-slate-100 dark:border-slate-800 pt-2">
                 <span className="bg-slate-100 dark:bg-slate-800 px-2 py-1 rounded-md">{b.category}</span>
-                <span>Year: {b.publication_year}</span>
+                <span className="font-medium">Threshold: <span className="font-bold">{b.threshold}</span></span>
               </div>
             </div>
           </Link>

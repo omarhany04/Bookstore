@@ -3,14 +3,17 @@ import { apiFetch } from "./client";
 function buildParams(q = {}) {
   const params = new URLSearchParams();
 
-  // Send the single search string
+  // Handle the single search bar input
   if (q.search?.trim()) {
     params.set("search", q.search.trim());
   }
 
-  if (q.category_id) params.set("category_id", String(q.category_id));
+  // Handle category filtering
+  if (q.category_id) {
+    params.set("category_id", String(q.category_id));
+  }
 
-  // Pagination
+  // Handle pagination
   if (q.page) params.set("page", String(q.page));
   if (q.pageSize) params.set("pageSize", String(q.pageSize));
 
@@ -18,11 +21,25 @@ function buildParams(q = {}) {
 }
 
 export const booksApi = {
+  // This fix restores the .list() method for ManageBooks.jsx
+  list: (q = {}) => {
+    const params = buildParams(q);
+    return apiFetch(`/books${params ? `?${params}` : ""}`);
+  },
+
+  // This handles the paged results for BrowseBooks.jsx
   listPaged: (q = {}) => {
     const params = buildParams(q);
     return apiFetch(`/books${params ? `?${params}` : ""}`);
   },
+
   get: (isbn) => apiFetch(`/books/${isbn}`),
+
+  // Required for Admin to save book edits
   update: (token, isbn, payload) => 
-    apiFetch(`/admin/books/${isbn}`, { method: "PATCH", token, body: payload }),
+    apiFetch(`/admin/books/${isbn}`, { 
+      method: "PATCH", 
+      token, 
+      body: payload 
+    }),
 };
