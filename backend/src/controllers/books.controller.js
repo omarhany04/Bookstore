@@ -5,27 +5,22 @@ function buildWhere(q) {
   const params = [];
   let i = 1;
 
-  if (q.isbn) {
-    clauses.push(`b.isbn = $${i++}`);
-    params.push(q.isbn);
-  }
-  if (q.title) {
-    clauses.push(`b.title ILIKE $${i++}`);
-    params.push(`%${q.title}%`);
-  }
-
+  // 1. Category Filter 
   if (q.category_id) {
     clauses.push(`b.category_id = $${i++}`);
     params.push(Number(q.category_id));
   }
 
-  if (q.publisher) {
-    clauses.push(`p.name ILIKE $${i++}`);
-    params.push(`%${q.publisher}%`);
-  }
-  if (q.author) {
-    clauses.push(`a.full_name ILIKE $${i++}`);
-    params.push(`%${q.author}%`);
+  // 2. Global Search (Requirement: ISBN, Title, Author, or Publisher)
+  if (q.search) {
+    clauses.push(`(
+      b.title ILIKE $${i} OR 
+      b.isbn ILIKE $${i} OR 
+      p.name ILIKE $${i} OR 
+      a.full_name ILIKE $${i}
+    )`);
+    params.push(`%${q.search}%`);
+    i++;
   }
 
   const where = clauses.length ? `WHERE ${clauses.join(" AND ")}` : "";

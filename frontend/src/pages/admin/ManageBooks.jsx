@@ -118,7 +118,7 @@ export default function ManageBooks() {
       try {
         const parsed = JSON.parse(e.message);
         if (Array.isArray(parsed)) {
-          setErr(parsed[0].message); // Shows "Number must be greater than or equal to 0"
+          setErr(parsed[0].message);
         } else {
           setErr(e.message);
         }
