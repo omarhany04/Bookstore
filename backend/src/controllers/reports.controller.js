@@ -3,10 +3,12 @@ const db = require("../db");
 exports.previousMonthSales = async (req, res, next) => {
   try {
     const r = await db.query(
-      `SELECT COALESCE(SUM(amount),0) AS total_sales
-       FROM sales_transactions
-       WHERE sale_date >= date_trunc('month', CURRENT_DATE) - interval '1 month'
-         AND sale_date <  date_trunc('month', CURRENT_DATE)`
+      `SELECT 
+      COUNT(*)  AS total_orders,
+      COALESCE(SUM(amount), 0) AS total_sales
+      FROM sales_transactions
+      WHERE sale_date >= CURRENT_DATE - INTERVAL '30 days';
+      `
     );
     res.json(r.rows[0]);
   } catch (err) {
