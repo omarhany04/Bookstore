@@ -130,12 +130,128 @@ An advanced **Admin Reporting Dashboard** provides actionable insights:
   - Backend, frontend, database, and AI service run with a single command.
 
 ---
-       
-## 🐳 Running the Project (Docker)
+
+## 🐳 Docker Images (Docker Hub)
+
+Prebuilt images are available on Docker Hub:
+
+- **Frontend:** `omarhany04/order-processing-frontend`
+- **Backend:** `omarhany04/order-processing-backend`
+
+---
+
+## 🤖 Ollama Setup (Booky Assistant)
+
+Booky Assistant uses **Ollama** with **Llama 3.2 (3B)**.  
+To make the chatbot work correctly, you must pull the model (one-time setup).
+
+### 1) Install Ollama (on your machine)
+
+Download Ollama from:
+
+https://ollama.com
+
+Verify installation:
 
 ```bash
-docker compose up --build
+ollama --version
 ```
+
+### 2) Pull the required model
+```bash
+ollama pull llama3.2:3b
+```
+
+## Quick Notes (Important)
+
+The backend connects to Ollama using:
+```bash
+OLLAMA_BASE_URL=http://ollama:11434
+
+OLLAMA_MODEL=llama3.2:3b
+```
+If you don’t pull the model, the assistant may fail or return no response.
+
+## Services & Ports
+<table>
+  <thead>
+    <tr>
+      <th align="left">Service</th>
+      <th align="left">URL</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><b>Frontend</b></td>
+      <td><a href="http://localhost:5173">http://localhost:5173</a></td>
+    </tr>
+    <tr>
+      <td><b>Backend</b></td>
+      <td><a href="http://localhost:5000">http://localhost:5000</a></td>
+    </tr>
+    <tr>
+      <td><b>Ollama</b></td>
+      <td><a href="http://localhost:11434">http://localhost:11434</a></td>
+    </tr>
+    <tr>
+      <td><b>Database</b></td>
+      <td><code>localhost:5433</code></td>
+    </tr>
+  </tbody>
+</table>
+
+
+
+
+
+## 🚀 Quick Start Guide
+
+### Prerequisites
+- **Docker** and **Docker Compose** installed on your system
+- At least **4GB RAM** available (for Ollama AI service)
+- Ports **5000**, **5173**, **5433**, and **11434** available (or configure different ports in `.env`)
+
+### Step 1: Clone the Repository
+```bash
+git clone https://github.com/omarhany04/Bookstore
+cd order-processing-system
+```
+
+### Step 2: Configure Environment Variables (Optional)
+The project works out-of-the-box with default values. For customization:
+
+```bash
+# Copy the example environment file
+cp .env.example .env
+
+# Edit .env if you want to change defaults (optional)
+```
+
+**Important:** For production deployments, **change the JWT_SECRET** in `.env` to a strong random string.
+
+### Step 3: Start the Application 
+```bash
+# Build and start all services
+docker compose up --build
+
+# Or run in detached mode (background)
+docker compose up --build -d
+```
+
+### Step 4: Access the Application
+- **Frontend:** http://localhost:5173
+- **Backend API:** http://localhost:5000/api
+- **Database:** localhost:5433 (user: `bookstore_user`, password: `bookstore_pass`)
+
+### Step 5: Stop the Application
+```bash
+# Stop all services
+docker compose down
+
+# Stop and remove volumes (clears database data ana ai model)
+docker compose down -v
+```
+---
 ---
 <div align="center">
   <img src="https://i.ibb.co/pv1wBhD2/Booky-Logo.jpg"
@@ -143,4 +259,5 @@ docker compose up --build
        height="100" />
 </div>
 
+---
 ---
