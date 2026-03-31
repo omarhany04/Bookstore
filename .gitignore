@@ -12,7 +12,9 @@ build/
 .env
 .env.*
 !.env.example
-.env.example
+**/.env
+**/.env.*
+!**/.env.example
 
 # OS
 .DS_Store
@@ -20,3 +22,6 @@ Thumbs.db
 
 # Vite
 .vite/
+
+# Vercel
+.vercel/
