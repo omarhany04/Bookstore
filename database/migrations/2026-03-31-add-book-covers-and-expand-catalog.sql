@@ -1,4 +1,6 @@
--- PUBLISHERS
+ALTER TABLE books
+ADD COLUMN IF NOT EXISTS cover_image_url TEXT;
+
 INSERT INTO publishers(name, address, phone) VALUES
 ('Pearson', 'London, UK', '+44-111-222'),
 ('OReilly', 'CA, USA', '+1-333-444'),
@@ -11,9 +13,9 @@ INSERT INTO publishers(name, address, phone) VALUES
 ('Crown Business', 'New York, USA', '+1-212-555-0195'),
 ('Farrar, Straus and Giroux', 'New York, USA', '+1-212-555-0171'),
 ('Avery', 'New York, USA', '+1-212-555-0118'),
-('Currency', 'New York, USA', '+1-212-555-0126');
+('Currency', 'New York, USA', '+1-212-555-0126')
+ON CONFLICT (name) DO NOTHING;
 
--- AUTHORS
 INSERT INTO authors(full_name) VALUES
 ('Thomas H. Cormen'),
 ('Andrew S. Tanenbaum'),
@@ -38,9 +40,9 @@ INSERT INTO authors(full_name) VALUES
 ('James Clear'),
 ('Richard Dawkins'),
 ('Daron Acemoglu'),
-('James A. Robinson');
+('James A. Robinson')
+ON CONFLICT (full_name) DO NOTHING;
 
--- CATEGORIES
 INSERT INTO categories(name) VALUES
 ('Science'),
 ('Art'),
@@ -51,27 +53,9 @@ INSERT INTO categories(name) VALUES
 ('Literature'),
 ('Philosophy'),
 ('Business'),
-('Psychology');
+('Psychology')
+ON CONFLICT (name) DO NOTHING;
 
--- USERS
-INSERT INTO users(
-  username,
-  password_hash,
-  first_name,
-  last_name,
-  email,
-  phone,
-  shipping_address,
-  role
-) VALUES
-('admin',
- '$2b$12$9eTQpRsDNtvUDJloN2jwPe07lAJ4b0JkHm.9CejSEjUu9v/ZV3j3i',
- 'Admin', 'One', 'admin@site.com', '0100000000', 'Alexandria', 'ADMIN'),
-('sara',
- '$2b$12$4gj94AuX1oGcJKh52Un25uYTzn.snCGrbwe9sZ.EuyJ8MiikdBMG6',
- 'Sara', 'Ali', 'sara@site.com', '0111111111', 'Cairo', 'CUSTOMER');
-
--- BOOKS
 INSERT INTO books(
   isbn,
   title,
@@ -346,9 +330,17 @@ INSERT INTO books(
   (SELECT publisher_id FROM publishers WHERE name = 'Currency'),
   9,
   3
-);
+)
+ON CONFLICT (isbn) DO UPDATE SET
+  title = EXCLUDED.title,
+  cover_image_url = EXCLUDED.cover_image_url,
+  publication_year = EXCLUDED.publication_year,
+  selling_price = EXCLUDED.selling_price,
+  category_id = EXCLUDED.category_id,
+  publisher_id = EXCLUDED.publisher_id,
+  stock_qty = EXCLUDED.stock_qty,
+  threshold = EXCLUDED.threshold;
 
--- BOOK_AUTHORS
 INSERT INTO book_authors(isbn, author_id) VALUES
 ('9780061660184', (SELECT author_id FROM authors WHERE full_name = 'Huston Smith')),
 ('9780099590088', (SELECT author_id FROM authors WHERE full_name = 'Yuval Noah Harari')),
@@ -375,11 +367,5 @@ INSERT INTO book_authors(isbn, author_id) VALUES
 ('9780735211292', (SELECT author_id FROM authors WHERE full_name = 'James Clear')),
 ('9780198788607', (SELECT author_id FROM authors WHERE full_name = 'Richard Dawkins')),
 ('9780307719218', (SELECT author_id FROM authors WHERE full_name = 'Daron Acemoglu')),
-('9780307719218', (SELECT author_id FROM authors WHERE full_name = 'James A. Robinson'));
-
--- CART (test data)
-INSERT INTO carts(user_id, status)
-VALUES (2, 'ACTIVE');
-
-INSERT INTO cart_items(cart_id, isbn, qty)
-VALUES (1, '9780451524935', 2);
+('9780307719218', (SELECT author_id FROM authors WHERE full_name = 'James A. Robinson'))
+ON CONFLICT DO NOTHING;

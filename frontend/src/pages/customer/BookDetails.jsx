@@ -95,6 +95,7 @@ export default function BookDetails() {
               title={book.title}
               subtitle={(book.authors || []).join(", ") || book.publisher}
               category={book.category}
+              imageUrl={book.cover_image_url}
               className="h-[28rem] w-full"
             />
 

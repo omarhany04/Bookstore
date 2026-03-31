@@ -27,7 +27,7 @@ const linkClass = ({ isActive }) =>
   `inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm font-semibold transition-all duration-300 ${
     isActive
       ? "bg-[color:var(--accent-soft)] text-[color:var(--text)] shadow-[inset_0_0_0_1px_var(--stroke-strong)]"
-      : "text-[color:var(--muted)] hover:bg-white/55 hover:text-[color:var(--text)] dark:hover:bg-white/8"
+      : "text-slate-600 hover:bg-white/55 hover:text-[color:var(--text)] dark:text-slate-200 dark:hover:bg-white/8 dark:hover:text-white"
   }`;
 
 export default function Navbar() {
@@ -53,7 +53,7 @@ export default function Navbar() {
             <img src={logo} alt="Booky" className="h-11 w-11 rounded-[1.2rem] object-cover shadow-md" />
             <div className="min-w-0">
               <div className="font-display text-2xl font-semibold leading-none text-[color:var(--text)]">Booky</div>
-              <div className="mt-1 hidden text-[0.72rem] font-bold uppercase tracking-[0.22em] text-[color:var(--muted)] sm:block">
+              <div className="mt-1 hidden text-[0.72rem] font-bold uppercase tracking-[0.22em] text-slate-500 dark:text-slate-300 sm:block">
                 Modern reading storefront
               </div>
             </div>
@@ -109,7 +109,7 @@ export default function Navbar() {
                   )}
                   <span className="max-w-[160px] truncate">
                     <span className="block font-semibold text-[color:var(--text)]">{user?.username}</span>
-                    <span className="block text-[0.68rem] font-bold uppercase tracking-[0.18em] text-[color:var(--muted)]">
+                    <span className="block text-[0.68rem] font-bold uppercase tracking-[0.18em] text-slate-500 dark:text-slate-300">
                       {user?.role}
                     </span>
                   </span>

@@ -1,8 +1,5 @@
 import { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
-import { BarChart3, Boxes, Sparkles, UsersRound } from "lucide-react";
-import Card from "../../components/ui/Card";
-import Button from "../../components/ui/Button";
+import { BarChart3, Sparkles, UsersRound } from "lucide-react";
 import { useAuth } from "../../context/AuthContext";
 import { reportsApi } from "../../api/reports";
 
@@ -68,7 +65,7 @@ export default function AdminDashboard() {
   return (
     <div className="space-y-6">
       <section className="glass-panel-strong rounded-[2.4rem] px-6 py-8 sm:px-8">
-        <div className="relative z-[1] flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+        <div className="relative z-[1]">
           <div>
             <div className="section-kicker">Admin dashboard</div>
             <h1 className="mt-3 font-display text-5xl font-semibold leading-[0.96] text-balance">
@@ -77,18 +74,6 @@ export default function AdminDashboard() {
             <p className="mt-4 text-sm leading-7 text-[color:var(--muted)]">
               The dashboard now highlights the core numbers first, then points you into the inventory and reporting actions that matter most.
             </p>
-          </div>
-
-          <div className="flex flex-wrap gap-2">
-            <Link to="/admin/books">
-              <Button variant="secondary">
-                <Boxes className="h-4 w-4" />
-                Manage books
-              </Button>
-            </Link>
-            <Link to="/admin/reports">
-              <Button>Open reports</Button>
-            </Link>
           </div>
         </div>
       </section>

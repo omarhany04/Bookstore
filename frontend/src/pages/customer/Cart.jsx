@@ -147,6 +147,7 @@ export default function Cart() {
                       title={item.title}
                       subtitle={`ISBN ${item.isbn}`}
                       category="Cart item"
+                      imageUrl={item.cover_image_url}
                       className="h-56 sm:h-full"
                     />
 

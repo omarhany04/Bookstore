@@ -41,6 +41,7 @@ CREATE TABLE categories (
 CREATE TABLE books (
   isbn VARCHAR(20) PRIMARY KEY,
   title VARCHAR(200) NOT NULL,
+  cover_image_url TEXT,
   publication_year INT CHECK (publication_year BETWEEN 1500 AND 2100),
   selling_price NUMERIC(10,2) NOT NULL CHECK (selling_price >= 0),
 

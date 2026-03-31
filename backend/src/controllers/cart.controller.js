@@ -28,7 +28,7 @@ exports.getCart = async (req, res, next) => {
     const cart_id = await ensureActiveCart(req.user.user_id);
 
     const items = await db.query(
-      `SELECT ci.isbn, b.title, b.selling_price, b.stock_qty, ci.qty,
+      `SELECT ci.isbn, b.title, b.cover_image_url, b.selling_price, b.stock_qty, ci.qty,
               (b.selling_price * ci.qty)::numeric(12,2) AS line_total
        FROM cart_items ci
        JOIN books b ON b.isbn = ci.isbn

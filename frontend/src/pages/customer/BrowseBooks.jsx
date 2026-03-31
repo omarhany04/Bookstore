@@ -279,6 +279,7 @@ export default function BrowseBooks() {
                       title={book.title}
                       subtitle={(book.authors || []).slice(0, 2).join(", ") || book.publisher}
                       category={book.category}
+                      imageUrl={book.cover_image_url}
                       className="h-60 sm:h-full"
                     />
 

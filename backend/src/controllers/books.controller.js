@@ -56,12 +56,14 @@ exports.listBooks = async (req, res, next) => {
         SELECT
           b.isbn,
           b.title,
+          b.cover_image_url,
           b.publication_year,
           b.selling_price,
           b.category_id,
           c.name AS category,
           b.stock_qty,
           b.threshold,
+          p.publisher_id,
           p.name AS publisher,
           COALESCE(
             json_agg(DISTINCT a.full_name) FILTER (WHERE a.author_id IS NOT NULL),
@@ -73,7 +75,7 @@ exports.listBooks = async (req, res, next) => {
         LEFT JOIN book_authors ba ON ba.isbn = b.isbn
         LEFT JOIN authors a ON a.author_id = ba.author_id
         ${where}
-        GROUP BY b.isbn, p.name, c.name
+        GROUP BY b.isbn, p.publisher_id, p.name, c.name
         ORDER BY b.title ASC
         LIMIT $${params.length + 1}
         OFFSET $${params.length + 2};
@@ -92,12 +94,14 @@ exports.listBooks = async (req, res, next) => {
       SELECT
         b.isbn,
         b.title,
+        b.cover_image_url,
         b.publication_year,
         b.selling_price,
         b.category_id,
         c.name AS category,
         b.stock_qty,
         b.threshold,
+        p.publisher_id,
         p.name AS publisher,
         COALESCE(
           json_agg(DISTINCT a.full_name) FILTER (WHERE a.author_id IS NOT NULL),
@@ -109,7 +113,7 @@ exports.listBooks = async (req, res, next) => {
       LEFT JOIN book_authors ba ON ba.isbn = b.isbn
       LEFT JOIN authors a ON a.author_id = ba.author_id
       ${where}
-      GROUP BY b.isbn, p.name, c.name
+      GROUP BY b.isbn, p.publisher_id, p.name, c.name
       ORDER BY b.title ASC;
     `;
 
@@ -127,6 +131,7 @@ exports.getBook = async (req, res, next) => {
       SELECT
         b.isbn,
         b.title,
+        b.cover_image_url,
         b.publication_year,
         b.selling_price,
         b.category_id,

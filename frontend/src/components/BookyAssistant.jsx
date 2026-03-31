@@ -6,6 +6,7 @@ import { apiFetch } from "../api/client";
 import { booksApi } from "../api/books";
 import { categoriesApi } from "../api/categories";
 import Button from "./ui/Button";
+import BookCover from "./ui/BookCover";
 
 const TYPING_SPEED_MS = 14;
 const CONNECTION_ERROR_TEXT =
@@ -41,30 +42,42 @@ function BookSuggestionCard({ book, onOpen }) {
       onClick={() => onOpen(book)}
       className="rounded-2xl border border-slate-200 bg-white p-3 text-left transition hover:border-slate-300 hover:shadow-sm dark:border-slate-800 dark:bg-slate-950 dark:hover:border-slate-700"
     >
-      <div className="text-[11px] font-bold uppercase tracking-[0.18em] text-slate-400">
-        {book.category || "Book"}
-      </div>
-      <div className="mt-1 line-clamp-2 text-sm font-extrabold text-slate-900 dark:text-white">
-        {book.title}
-      </div>
-      {book.authors?.length > 0 && (
-        <div className="mt-1 text-xs text-slate-500 dark:text-slate-300">
-          {book.authors.join(", ")}
+      <div className="grid grid-cols-[84px_1fr] gap-3">
+        <BookCover
+          title={book.title}
+          subtitle={(book.authors || []).slice(0, 2).join(", ") || book.publisher}
+          category={book.category || "Book"}
+          imageUrl={book.cover_image_url}
+          className="h-28 rounded-[1.1rem]"
+        />
+
+        <div>
+          <div className="text-[11px] font-bold uppercase tracking-[0.18em] text-slate-400">
+            {book.category || "Book"}
+          </div>
+          <div className="mt-1 line-clamp-2 text-sm font-extrabold text-slate-900 dark:text-white">
+            {book.title}
+          </div>
+          {book.authors?.length > 0 && (
+            <div className="mt-1 text-xs text-slate-500 dark:text-slate-300">
+              {book.authors.join(", ")}
+            </div>
+          )}
+          <div className="mt-3 flex items-center justify-between gap-2 text-xs">
+            <span className="font-bold text-slate-900 dark:text-white">
+              {Number(book.selling_price || 0).toFixed(2)} EGP
+            </span>
+            <span
+              className={`rounded-full px-2 py-1 font-semibold ${
+                Number(book.stock_qty || 0) > 0
+                  ? "bg-emerald-100 text-emerald-700 dark:bg-emerald-950/30 dark:text-emerald-300"
+                  : "bg-red-100 text-red-700 dark:bg-red-950/30 dark:text-red-300"
+              }`}
+            >
+              {Number(book.stock_qty || 0) > 0 ? `In stock: ${book.stock_qty}` : "Out of stock"}
+            </span>
+          </div>
         </div>
-      )}
-      <div className="mt-3 flex items-center justify-between gap-2 text-xs">
-        <span className="font-bold text-slate-900 dark:text-white">
-          {Number(book.selling_price || 0).toFixed(2)} EGP
-        </span>
-        <span
-          className={`rounded-full px-2 py-1 font-semibold ${
-            Number(book.stock_qty || 0) > 0
-              ? "bg-emerald-100 text-emerald-700 dark:bg-emerald-950/30 dark:text-emerald-300"
-              : "bg-red-100 text-red-700 dark:bg-red-950/30 dark:text-red-300"
-          }`}
-        >
-          {Number(book.stock_qty || 0) > 0 ? `In stock: ${book.stock_qty}` : "Out of stock"}
-        </span>
       </div>
     </button>
   );
