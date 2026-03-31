@@ -36,9 +36,14 @@ Booky is a full-stack bookstore platform built with React, Express, Node.js, and
 
 ### Admin flows
 - Protected admin dashboard
-- Manage books, categories, publishers, and stock thresholds
+- Manage books, real cover images, author lists, publisher assignments, and stock thresholds
 - Review replenishment orders
 - View sales and inventory reports
+
+### Catalog and branding polish
+- Database-backed book cover URLs with graceful visual fallback art in the storefront
+- Expanded seeded catalog with internet-backed Open Library cover URLs
+- Theme-aware navbar branding and favicon switching for light and dark mode
 
 ### Database-driven inventory logic
 - PostgreSQL triggers create replenishment orders when stock drops below threshold
@@ -162,8 +167,9 @@ The current recommended free deployment path for this repo is:
 ### Supabase
 
 1. Create a Supabase project.
-2. Run [`database/schema.sql`](./database/schema.sql) and [`database/seed.sql`](./database/seed.sql) in the SQL editor.
-3. Use the transaction pooler connection string for `DATABASE_URL`.
+2. For a fresh database, run [`database/schema.sql`](./database/schema.sql) and then [`database/seed.sql`](./database/seed.sql) in the SQL editor.
+3. For an existing database that already has Booky data, run [`database/migrations/2026-03-31-add-book-covers-and-expand-catalog.sql`](./database/migrations/2026-03-31-add-book-covers-and-expand-catalog.sql) instead.
+4. Use the transaction pooler connection string for `DATABASE_URL`.
 
 ### Backend on Vercel
 
@@ -213,6 +219,7 @@ The seed data creates an admin account in [`database/seed.sql`](./database/seed.
 - `GET /health`
 - `GET /api/books`
 - `GET /api/categories`
+- `GET /api/publishers`
 - `POST /api/auth/login`
 - `POST /api/chat`
 - `GET /api/admin/replenishment-orders`

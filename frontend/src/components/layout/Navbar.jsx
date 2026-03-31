@@ -26,8 +26,8 @@ const navItems = [
 const linkClass = ({ isActive }) =>
   `inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm font-semibold transition-all duration-300 ${
     isActive
-      ? "bg-[color:var(--accent-soft)] text-[color:var(--text)] shadow-[inset_0_0_0_1px_var(--stroke-strong)]"
-      : "text-slate-600 hover:bg-white/55 hover:text-[color:var(--text)] dark:text-slate-200 dark:hover:bg-white/8 dark:hover:text-white"
+      ? "bg-[color:var(--accent-soft)] text-[color:var(--text)] shadow-[inset_0_0_0_1px_var(--stroke-strong)] dark:bg-white/72 dark:text-slate-900 dark:shadow-[inset_0_0_0_1px_rgba(15,23,42,0.08)]"
+      : "text-slate-600 hover:bg-white/55 hover:text-[color:var(--text)] dark:text-slate-900 dark:hover:bg-white/32 dark:hover:text-slate-900"
   }`;
 
 export default function Navbar() {
@@ -51,7 +51,7 @@ export default function Navbar() {
       <div className="mx-auto max-w-7xl rounded-[1.8rem] border border-white/55 bg-white/65 px-4 py-3 shadow-[0_16px_54px_rgba(55,35,17,0.09)] backdrop-blur-xl dark:border-white/10 dark:bg-slate-950/62">
         <div className="flex items-center justify-between gap-4">
           <Link to="/books" className="flex min-w-0 items-center gap-3" onClick={closeMenu}>
-            <img src={logo} alt="Booky" className="h-11 w-11 rounded-[1.2rem] object-cover shadow-md" />
+            <img src={logo} alt="Booky" className="h-11 w-11 object-contain" />
             <div className="min-w-0">
               <div className="font-display text-2xl font-semibold leading-none text-[color:var(--text)]">Booky</div>
               <div className="mt-1 hidden text-[0.72rem] font-bold uppercase tracking-[0.22em] text-slate-500 dark:text-slate-300 sm:block">
@@ -76,7 +76,7 @@ export default function Navbar() {
             <button
               type="button"
               onClick={toggle}
-              className="inline-flex h-11 w-11 items-center justify-center rounded-full border border-[color:var(--stroke-strong)] bg-white/55 text-[color:var(--text)] shadow-sm backdrop-blur transition-all duration-300 hover:-translate-y-0.5 hover:bg-white/80 dark:bg-white/5 dark:hover:bg-white/10"
+              className="inline-flex h-11 w-11 items-center justify-center rounded-full border border-[color:var(--stroke-strong)] bg-white/55 text-[color:var(--text)] shadow-sm backdrop-blur transition-all duration-300 hover:-translate-y-0.5 hover:bg-white/80 dark:border-white/25 dark:bg-white/70 dark:text-slate-900 dark:hover:bg-white/85"
               aria-label="Toggle theme"
             >
               {isDark ? <SunMedium className="h-4 w-4" /> : <MoonStar className="h-4 w-4" />}
@@ -85,7 +85,12 @@ export default function Navbar() {
             {!isAuthed ? (
               <div className="hidden items-center gap-2 sm:flex">
                 <Link to="/login">
-                  <Button variant="secondary">Login</Button>
+                  <Button
+                    variant="secondary"
+                    className="dark:border-white/25 dark:bg-white/70 dark:text-slate-900 dark:hover:bg-white/85"
+                  >
+                    Login
+                  </Button>
                 </Link>
                 <Link to="/register">
                   <Button>Join Booky</Button>
@@ -95,7 +100,7 @@ export default function Navbar() {
               <>
                 <Link
                   to="/profile"
-                  className="hidden items-center gap-3 rounded-full border border-[color:var(--stroke-strong)] bg-white/58 px-2.5 py-1.5 text-sm shadow-sm backdrop-blur transition-all duration-300 hover:-translate-y-0.5 hover:bg-white/78 dark:bg-white/5 dark:hover:bg-white/10 sm:flex"
+                  className="hidden items-center gap-3 rounded-full border border-[color:var(--stroke-strong)] bg-white/58 px-2.5 py-1.5 text-sm shadow-sm backdrop-blur transition-all duration-300 hover:-translate-y-0.5 hover:bg-white/78 dark:border-white/25 dark:bg-white/68 dark:hover:bg-white/82 sm:flex"
                 >
                   {user?.avatarUrl ? (
                     <img
@@ -110,14 +115,14 @@ export default function Navbar() {
                   )}
                   <span className="max-w-[160px] truncate">
                     <span className="block font-semibold text-[color:var(--text)]">{user?.username}</span>
-                    <span className="block text-[0.68rem] font-bold uppercase tracking-[0.18em] text-slate-500 dark:text-slate-300">
+                    <span className="block text-[0.68rem] font-bold uppercase tracking-[0.18em] text-slate-500 dark:text-slate-700">
                       {user?.role}
                     </span>
                   </span>
                 </Link>
                 <Button
                   variant="secondary"
-                  className="hidden sm:inline-flex"
+                  className="hidden sm:inline-flex dark:border-white/25 dark:bg-white/70 dark:text-slate-900 dark:hover:bg-white/85"
                   onClick={() => {
                     logout();
                     nav("/login");
@@ -132,7 +137,7 @@ export default function Navbar() {
             <button
               type="button"
               onClick={() => setMobileOpen((value) => !value)}
-              className="inline-flex h-11 w-11 items-center justify-center rounded-full border border-[color:var(--stroke-strong)] bg-white/55 text-[color:var(--text)] shadow-sm backdrop-blur transition-all duration-300 hover:bg-white/80 dark:bg-white/5 dark:hover:bg-white/10 lg:hidden"
+              className="inline-flex h-11 w-11 items-center justify-center rounded-full border border-[color:var(--stroke-strong)] bg-white/55 text-[color:var(--text)] shadow-sm backdrop-blur transition-all duration-300 hover:bg-white/80 dark:border-white/25 dark:bg-white/70 dark:text-slate-900 dark:hover:bg-white/85 lg:hidden"
               aria-label="Toggle navigation"
             >
               {mobileOpen ? <X className="h-4 w-4" /> : <Menu className="h-4 w-4" />}
@@ -165,7 +170,10 @@ export default function Navbar() {
                 {!isAuthed ? (
                   <div className="grid gap-2 pt-2">
                     <Link to="/login" onClick={closeMenu}>
-                      <Button variant="secondary" className="w-full">
+                      <Button
+                        variant="secondary"
+                        className="w-full dark:border-white/25 dark:bg-white/70 dark:text-slate-900 dark:hover:bg-white/85"
+                      >
                         Login
                       </Button>
                     </Link>
@@ -176,13 +184,16 @@ export default function Navbar() {
                 ) : (
                   <div className="grid gap-2 pt-2">
                     <Link to="/profile" onClick={closeMenu}>
-                      <Button variant="secondary" className="w-full">
+                      <Button
+                        variant="secondary"
+                        className="w-full dark:border-white/25 dark:bg-white/70 dark:text-slate-900 dark:hover:bg-white/85"
+                      >
                         View profile
                       </Button>
                     </Link>
                     <Button
                       variant="secondary"
-                      className="w-full"
+                      className="w-full dark:border-white/25 dark:bg-white/70 dark:text-slate-900 dark:hover:bg-white/85"
                       onClick={() => {
                         logout();
                         closeMenu();
