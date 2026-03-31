@@ -1,4 +1,5 @@
 import { createContext, useContext, useEffect, useMemo, useState } from "react";
+import { getThemeLogo } from "../lib/branding";
 
 const ThemeContext = createContext(null);
 
@@ -10,6 +11,11 @@ export function ThemeProvider({ children }) {
     if (theme === "dark") root.classList.add("dark");
     else root.classList.remove("dark");
     localStorage.setItem("theme", theme);
+
+    const favicon = document.getElementById("app-favicon");
+    if (favicon) {
+      favicon.setAttribute("href", getThemeLogo(theme === "dark"));
+    }
   }, [theme]);
 
   const value = useMemo(() => ({

@@ -15,8 +15,8 @@ import {
 } from "lucide-react";
 import Button from "../ui/Button";
 import { useAuth } from "../../context/AuthContext";
-import logo from "../../assets/BookyLogo.jpg";
 import { useTheme } from "../../context/ThemeContext";
+import { getThemeLogo } from "../../lib/branding";
 
 const navItems = [
   { to: "/books", label: "Books", icon: LibraryBig },
@@ -35,6 +35,7 @@ export default function Navbar() {
   const nav = useNavigate();
   const { isDark, toggle } = useTheme();
   const [mobileOpen, setMobileOpen] = useState(false);
+  const logo = getThemeLogo(isDark);
 
   const menuItems = [
     ...navItems,

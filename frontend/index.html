@@ -3,7 +3,15 @@
   <head>
     <meta charset="UTF-8" />
 
-    <link rel="icon" href="./public/favicon.ico" />
+    <link id="app-favicon" rel="icon" type="image/png" href="/booky-logo-light.png" />
+
+    <script>
+      const savedTheme = localStorage.getItem("theme") || "light";
+      if (savedTheme === "dark") {
+        document.documentElement.classList.add("dark");
+        document.getElementById("app-favicon")?.setAttribute("href", "/booky-logo-dark.png");
+      }
+    </script>
 
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Booky</title>
