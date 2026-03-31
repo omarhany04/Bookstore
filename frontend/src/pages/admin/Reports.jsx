@@ -20,14 +20,19 @@ export default function Reports() {
   useEffect(() => {
     (async () => {
       try {
-        setPrev(await reportsApi.previousMonthSales(token));
-        setTopC(await reportsApi.topCustomers(token));
-        setTopB(await reportsApi.topBooks(token));
+        const [prevData, topCustomersData, topBooksData] = await Promise.all([
+          reportsApi.previousMonthSales(token),
+          reportsApi.topCustomers(token),
+          reportsApi.topBooks(token),
+        ]);
+        setPrev(prevData);
+        setTopC(topCustomersData);
+        setTopB(topBooksData);
       } catch (e) {
         setErr(e.message);
       }
     })();
-  }, []);
+  }, [token]);
 
   async function fetchDay() {
     setErr("");

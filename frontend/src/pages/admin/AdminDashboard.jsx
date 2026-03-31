@@ -6,15 +6,24 @@ import { reportsApi } from "../../api/reports";
 export default function AdminDashboard() {
   const { token } = useAuth();
   const [stats, setStats] = useState(null);
+  const [err, setErr] = useState("");
 
   useEffect(() => {
     (async () => {
-      const prev = await reportsApi.previousMonthSales(token);
-      const topC = await reportsApi.topCustomers(token);
-      const topB = await reportsApi.topBooks(token);
-      setStats({ prev, topC, topB });
+      try {
+        const [prev, topC, topB] = await Promise.all([
+          reportsApi.previousMonthSales(token),
+          reportsApi.topCustomers(token),
+          reportsApi.topBooks(token),
+        ]);
+        setStats({ prev, topC, topB });
+      } catch (error) {
+        setErr(error.message);
+      }
     })();
-  }, []);
+  }, [token]);
+
+  if (err) return <div className="text-red-600">{err}</div>;
 
   if (!stats) return <div>Loading...</div>;
 

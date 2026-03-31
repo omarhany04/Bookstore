@@ -1,263 +1,235 @@
-# 📚 Booky – Online Bookstore Order Processing System
-       
-Booky is a **full-stack, containerized Order Processing System** for an online bookstore.  
-It manages the **entire lifecycle of book sales** — from customer browsing and checkout to administrative inventory control, automated stock replenishment, and business analytics.
+# Booky
 
-The system is built using a modern **PERN stack** (**PostgreSQL, Express, React, Node.js**) and orchestrated with **Docker Compose** for seamless deployment.
+Booky is a full-stack bookstore platform built with React, Express, Node.js, and PostgreSQL. It covers the full customer journey from browsing books and checkout to order history, profile management, admin inventory workflows, replenishment tracking, reports, and a Booky-specific AI assistant.
 
----
-
-## 🚀 Tech Stack
-
-### Backend
-- **Node.js + Express**
-- **PostgreSQL**
-- **JWT Authentication**
-- **Role-Based Access Control (RBAC)**
-- **Database Triggers & Stored Logic**
+## Current Stack
 
 ### Frontend
-- **React (Vite)**
-- **Tailwind CSS**
-- **Context API (Auth & Theme)**
-- **Dark / Light Mode**
+- React + Vite
+- Tailwind CSS
+- React Router
+- Context-based auth and app state
 
-### DevOps & Infrastructure
-- **Docker & Docker Compose**
-- **PostgreSQL Database Containers**
-- **AI Service (Ollama – Llama 3.2)**
+### Backend
+- Node.js + Express
+- PostgreSQL via `pg`
+- JWT authentication
+- Role-based access control
 
----
+### Database
+- PostgreSQL schema, triggers, and seed data in [`database/`](./database)
 
-## ✨ Key Features
+### AI Assistant
+- Booky-specific chatbot with built-in direct intents
+- Cloud provider chain: Gemini -> OpenRouter -> Groq
+- Recommends books from the current catalog and stays scoped to Booky topics
 
-## 1️⃣ Customer Experience
+## Main Features
 
-### 🔍 Smart Browsing & Search
-- Browse books with **pagination** for performance.
-- Filter by **title** or **category**.
-- View detailed book information.
+### Customer flows
+- Browse books with category filtering and detail pages
+- Add books to cart with stock-aware quantity handling
+- Checkout with card validation or cash on delivery
+- View past orders and cancel confirmed orders
+- Manage profile details and avatar
+- Take the reading quiz
 
-### 🛒 Shopping Cart System
-- Persistent shopping cart.
-- Quantity adjustment with **real-time stock validation**.
-- Prevents adding items beyond available warehouse stock.
+### Admin flows
+- Protected admin dashboard
+- Manage books, categories, publishers, and stock thresholds
+- Review replenishment orders
+- View sales and inventory reports
 
-### 💳 Flexible Checkout
-- **Credit/Debit Card** payments with **Luhn Algorithm validation**.
-- **Cash on Delivery (COD)** option.
-- Secure order confirmation flow.
+### Database-driven inventory logic
+- PostgreSQL triggers create replenishment orders when stock drops below threshold
+- Confirming replenishment updates stock at the database layer
+- Order cancellation restores stock and keeps reports consistent
 
-### 📦 Order Management
-- View complete **order history**.
-- Cancel orders in **Confirmed** status.
-- Automatic **stock restoration** when an order is canceled.
+## Project Structure
 
-### 👤 User Profiles
-- Update personal information.
-- Manage shipping addresses.
-- Upload or change **profile avatars** (stored locally).
-
----
-
-## 2️⃣ Administrative & Inventory Control
-
-### 🔐 Role-Based Access Control (RBAC)
-- Separate **ADMIN** and **CUSTOMER** roles.
-- Protected backend routes and frontend views.
-
-### 📘 Book Management
-- Add, edit, and delete books.
-- Manage **authors**, **publishers**, and **categories**.
-- Control pricing and stock levels.
-
-### 🔄 Automated Stock Replenishment (Core Feature)
-- When a book’s stock drops below a defined **threshold**:
-  - A **PostgreSQL trigger** automatically creates a **replenishment order**.
-- Ensures stock consistency and zero downtime.
-
-### ✅ Replenishment Confirmation
-- Admins review replenishment orders.
-- Upon confirmation:
-  - A second **database trigger** automatically increases stock.
-- All logic handled at the database level for **maximum integrity**.
-
----
-
-## 3️⃣ Business Intelligence & Reporting
-
-An advanced **Admin Reporting Dashboard** provides actionable insights:
-
-### 📊 Sales Analytics
-- Total sales for:
-  - Previous month
-  - Any specific calendar day
-
-### 🏆 Top Performers
-- **Top 5 customers** by total spending.
-- **Top 10 best-selling books** over the last 3 months.
-
-### 📦 Inventory Health
-- Track how many times each book required replenishment.
-- Identify high-demand or low-stock-risk items.
-
----
-
-## 4️⃣ 🤖 AI-Powered Assistance
-
-### Booky Assistant
-- Integrated **book-focused AI chatbot** powered by **Ollama (Llama 3.2)**.
-- Designed specifically for bookstore-related interactions:
-  - Book recommendations
-  - Category explanations
-  - Browsing and checkout guidance
-  - Admin workflow assistance
-- The chatbot does **not** answer general or unrelated questions.
-
----
-
-## 🛠 Technical Highlights
-
-- **Database Triggers**
-  - Prevent negative stock.
-  - Automate replenishment and stock updates.
-- **High Data Integrity**
-  - Business logic enforced at the database level.
-- **Responsive UI**
-  - Built with Tailwind CSS.
-  - Fully supports **Dark Mode & Light Mode**.
-- **Containerized Architecture**
-  - Backend, frontend, database, and AI service run with a single command.
-
----
-
-## 🐳 Docker Images (Docker Hub)
-
-Prebuilt images are available on Docker Hub:
-
-- **Frontend:** `omarhany04/order-processing-frontend`
-- **Backend:** `omarhany04/order-processing-backend`
-
----
-
-## 🤖 Ollama Setup (Booky Assistant)
-
-Booky Assistant uses **Ollama** with **Llama 3.2 (3B)**.  
-To make the chatbot work correctly, you must pull the model (one-time setup).
-
-### 1) Install Ollama (on your machine)
-
-Download Ollama from:
-
-https://ollama.com
-
-Verify installation:
-
-```bash
-ollama --version
+```text
+Booky/
+├─ backend/
+├─ frontend/
+├─ database/
+├─ docker-compose.yml
+└─ README.md
 ```
 
-### 2) Pull the required model
-```bash
-ollama pull llama3.2:3b
+## Environment Variables
+
+### Backend
+
+Use [`backend/.env.example`](./backend/.env.example) as the template.
+
+Required for production or any hosted deployment:
+
+```env
+DATABASE_URL=
+JWT_SECRET=
+GEMINI_API_KEY=
+OPENROUTER_API_KEY=
+GROQ_API_KEY=
 ```
 
-## Quick Notes (Important)
+Optional model overrides:
 
-The backend connects to Ollama using:
-```bash
-OLLAMA_BASE_URL=http://ollama:11434
-
-OLLAMA_MODEL=llama3.2:3b
-```
-If you don’t pull the model, the assistant may fail or return no response.
-
-## Services & Ports
-<table>
-  <thead>
-    <tr>
-      <th align="left">Service</th>
-      <th align="left">URL</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <td><b>Frontend</b></td>
-      <td><a href="http://localhost:5173">http://localhost:5173</a></td>
-    </tr>
-    <tr>
-      <td><b>Backend</b></td>
-      <td><a href="http://localhost:5000">http://localhost:5000</a></td>
-    </tr>
-    <tr>
-      <td><b>Ollama</b></td>
-      <td><a href="http://localhost:11434">http://localhost:11434</a></td>
-    </tr>
-    <tr>
-      <td><b>Database</b></td>
-      <td><code>localhost:5433</code></td>
-    </tr>
-  </tbody>
-</table>
-
-
-
-
-
-## 🚀 Quick Start Guide
-
-### Prerequisites
-- **Docker** and **Docker Compose** installed on your system
-- At least **4GB RAM** available (for Ollama AI service)
-- Ports **5000**, **5173**, **5433**, and **11434** available (or configure different ports in `.env`)
-
-### Step 1: Clone the Repository
-```bash
-git clone https://github.com/omarhany04/Bookstore
-cd order-processing-system
+```env
+GEMINI_MODEL=gemini-2.5-flash-lite
+OPENROUTER_MODEL=meta-llama/llama-3.3-70b-instruct:free
+GROQ_MODEL=llama-3.1-8b-instant
 ```
 
-### Step 2: Configure Environment Variables (Optional)
-The project works out-of-the-box with default values. For customization:
+Local-only:
 
-```bash
-# Copy the example environment file
-cp .env.example .env
-
-# Edit .env if you want to change defaults (optional)
+```env
+PORT=5000
 ```
 
-**Important:** For production deployments, **change the JWT_SECRET** in `.env` to a strong random string.
+### Frontend
 
-### Step 3: Start the Application 
+For local or hosted frontend builds:
+
+```env
+VITE_API_BASE=http://localhost:5000/api
+```
+
+## Local Development
+
+You can run Booky either with Docker Compose or by starting frontend and backend separately.
+
+### Option 1: Docker Compose
+
+1. Copy [`backend/.env.example`](./backend/.env.example) to `backend/.env`.
+2. Fill in `JWT_SECRET` and any chatbot provider keys you want to use.
+3. From the repo root, start the stack:
+
 ```bash
-# Build and start all services
 docker compose up --build
-
-# Or run in detached mode (background)
-docker compose up --build -d
 ```
 
-### Step 4: Access the Application
-- **Frontend:** http://localhost:5173
-- **Backend API:** http://localhost:5000/api
-- **Database:** localhost:5433 (user: `bookstore_user`, password: `bookstore_pass`)
+Local service URLs:
 
-### Step 5: Stop the Application
+- Frontend: [http://localhost:5173](http://localhost:5173)
+- Backend: [http://localhost:5000](http://localhost:5000)
+- Health check: [http://localhost:5000/health](http://localhost:5000/health)
+- Postgres: `localhost:5433`
+
+Compose starts:
+- PostgreSQL with [`database/schema.sql`](./database/schema.sql) and [`database/seed.sql`](./database/seed.sql)
+- Express backend
+- Vite frontend
+
+To stop everything:
+
 ```bash
-# Stop all services
 docker compose down
-
-# Stop and remove volumes (clears database data ana ai model)
-docker compose down -v
 ```
----
----
+
+### Option 2: Run services manually
+
+1. Start PostgreSQL locally or use Supabase.
+2. Create `backend/.env` with a valid `DATABASE_URL`, `JWT_SECRET`, and optional chatbot provider keys.
+3. Start the backend:
+
+```bash
+cd backend
+npm install
+npm start
+```
+
+4. In a second terminal, start the frontend:
+
+```bash
+cd frontend
+npm install
+npm run dev
+```
+
+Default local URLs:
+
+- Frontend: [http://localhost:5173](http://localhost:5173)
+- Backend API base: [http://localhost:5000/api](http://localhost:5000/api)
+
+## Production Deployment
+
+The current recommended free deployment path for this repo is:
+
+- Frontend: Vercel
+- Backend: Vercel
+- Database: Supabase
+
+### Supabase
+
+1. Create a Supabase project.
+2. Run [`database/schema.sql`](./database/schema.sql) and [`database/seed.sql`](./database/seed.sql) in the SQL editor.
+3. Use the transaction pooler connection string for `DATABASE_URL`.
+
+### Backend on Vercel
+
+Deploy the `backend` directory as its own Vercel project and add:
+
+```env
+DATABASE_URL=postgresql://postgres.YOUR_PROJECT_REF:YOUR_DB_PASSWORD@aws-1-eu-west-1.pooler.supabase.com:6543/postgres
+JWT_SECRET=your-strong-random-secret
+GEMINI_API_KEY=...
+OPENROUTER_API_KEY=...
+GROQ_API_KEY=...
+GEMINI_MODEL=gemini-2.5-flash-lite
+OPENROUTER_MODEL=meta-llama/llama-3.3-70b-instruct:free
+GROQ_MODEL=llama-3.1-8b-instant
+```
+
+### Frontend on Vercel
+
+Deploy the `frontend` directory as a second Vercel project and add:
+
+```env
+VITE_API_BASE=https://your-backend-project.vercel.app/api
+```
+
+[`frontend/vercel.json`](./frontend/vercel.json) is already included so client-side routes work correctly on refresh.
+
+## Chatbot Notes
+
+- The assistant is scoped to Booky topics only.
+- It can answer direct built-in questions even when no provider key is available.
+- For richer AI responses, configure at least one of:
+  - `GEMINI_API_KEY`
+  - `OPENROUTER_API_KEY`
+  - `GROQ_API_KEY`
+
+Starter prompts in the UI include:
+- `Show me science books`
+- `How does checkout work?`
+- `What can admins do?`
+
+## Seeded Admin User
+
+The seed data creates an admin account in [`database/seed.sql`](./database/seed.sql). Review that file before sharing or deploying the project and change seeded credentials in real environments.
+
+## Useful Endpoints
+
+- `GET /health`
+- `GET /api/books`
+- `GET /api/categories`
+- `POST /api/auth/login`
+- `POST /api/chat`
+- `GET /api/admin/replenishment-orders`
+- `GET /api/reports/top-books`
+
+## Notes
+
+- Keep real secrets in `backend/.env` or your hosting platform environment settings, not in the repo.
+- [`backend/.env.example`](./backend/.env.example) is only a template.
+- If admin access changes for a user, signing out and back in is the safest way to refresh the frontend session state.
+
 <div align="center">
-  <img src="https://i.ibb.co/pv1wBhD2/Booky-Logo.jpg"
-       alt="Project Logo"
-       height="100" />
+  <img
+    src="https://i.ibb.co/pv1wBhD2/Booky-Logo.jpg"
+    alt="Booky logo"
+    height="100"
+  />
 </div>
 
----
 ---
