@@ -1,5 +1,8 @@
 import { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
+import { BarChart3, Boxes, Sparkles, UsersRound } from "lucide-react";
 import Card from "../../components/ui/Card";
+import Button from "../../components/ui/Button";
 import { useAuth } from "../../context/AuthContext";
 import { reportsApi } from "../../api/reports";
 
@@ -23,24 +26,91 @@ export default function AdminDashboard() {
     })();
   }, [token]);
 
-  if (err) return <div className="text-red-600">{err}</div>;
+  if (err) {
+    return (
+      <div className="rounded-[1.6rem] border border-red-200/70 bg-red-100/80 px-5 py-4 text-sm font-semibold text-red-800 dark:border-red-900/50 dark:bg-red-950/30 dark:text-red-200">
+        {err}
+      </div>
+    );
+  }
 
-  if (!stats) return <div>Loading...</div>;
+  if (!stats) {
+    return (
+      <div className="grid min-h-[35vh] place-items-center">
+        <div className="glass-panel rounded-[2rem] px-6 py-5 text-center">
+          <div className="section-kicker">Loading</div>
+          <div className="mt-2 font-display text-2xl font-semibold">Gathering admin metrics</div>
+        </div>
+      </div>
+    );
+  }
+
+  const cards = [
+    {
+      label: "Previous month sales",
+      value: `${Number(stats.prev.total_sales).toFixed(2)} EGP`,
+      icon: BarChart3,
+    },
+    {
+      label: "Top customer",
+      value: stats.topC[0]?.username || "—",
+      helper: stats.topC[0] ? `${Number(stats.topC[0].total_spent).toFixed(2)} EGP spent` : "No customer data yet",
+      icon: UsersRound,
+    },
+    {
+      label: "Top selling book",
+      value: stats.topB[0]?.book_name_snapshot || "—",
+      helper: `${stats.topB[0]?.total_sold || 0} copies sold`,
+      icon: Sparkles,
+    },
+  ];
 
   return (
     <div className="space-y-6">
-      <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
-        <Card title="Sales (previous month)">
-          <div className="text-3xl font-black">{Number(stats.prev.total_sales).toFixed(2)} EGP</div>
-        </Card>
-        <Card title="Top customers (3 months)">
-          <div className="text-sm text-slate-600">{stats.topC[0]?.username || "—"}</div>
-          <div className="text-xl font-black">{stats.topC[0] ? Number(stats.topC[0].total_spent).toFixed(2) : "0.00"} EGP</div>
-        </Card>
-        <Card title="Top selling book (3 months)">
-          <div className="text-sm text-slate-600 line-clamp-2">{stats.topB[0]?.book_name_snapshot || "—"}</div>
-          <div className="text-xl font-black">{stats.topB[0]?.total_sold || 0} copies</div>
-        </Card>
+      <section className="glass-panel-strong rounded-[2.4rem] px-6 py-8 sm:px-8">
+        <div className="relative z-[1] flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+          <div>
+            <div className="section-kicker">Admin dashboard</div>
+            <h1 className="mt-3 font-display text-5xl font-semibold leading-[0.96] text-balance">
+              A cleaner command view for inventory, performance, and replenishment.
+            </h1>
+            <p className="mt-4 text-sm leading-7 text-[color:var(--muted)]">
+              The dashboard now highlights the core numbers first, then points you into the inventory and reporting actions that matter most.
+            </p>
+          </div>
+
+          <div className="flex flex-wrap gap-2">
+            <Link to="/admin/books">
+              <Button variant="secondary">
+                <Boxes className="h-4 w-4" />
+                Manage books
+              </Button>
+            </Link>
+            <Link to="/admin/reports">
+              <Button>Open reports</Button>
+            </Link>
+          </div>
+        </div>
+      </section>
+
+      <div className="grid gap-4 lg:grid-cols-3">
+        {cards.map((card) => {
+          const Icon = card.icon;
+          return (
+            <div key={card.label} className="glass-panel rounded-[2rem] p-5">
+              <div className="relative z-[1]">
+                <Icon className="h-5 w-5 text-[color:var(--accent-deep)]" />
+                <div className="mt-4 text-[0.72rem] font-extrabold uppercase tracking-[0.2em] text-[color:var(--muted)]">
+                  {card.label}
+                </div>
+                <div className="mt-3 font-display text-3xl font-semibold leading-tight text-[color:var(--text)]">
+                  {card.value}
+                </div>
+                {card.helper && <div className="mt-2 text-sm text-[color:var(--muted)]">{card.helper}</div>}
+              </div>
+            </div>
+          );
+        })}
       </div>
     </div>
   );

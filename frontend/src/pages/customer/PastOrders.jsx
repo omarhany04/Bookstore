@@ -11,11 +11,7 @@ export default function PastOrders() {
   const [orders, setOrders] = useState([]);
   const [err, setErr] = useState("");
   const [busyOrderId, setBusyOrderId] = useState(null);
-
-  // Banner notice after cancel
   const [notice, setNotice] = useState("");
-
-  // Confirm modal state
   const [confirmOrderId, setConfirmOrderId] = useState(null);
 
   async function load() {
@@ -23,8 +19,8 @@ export default function PastOrders() {
     try {
       const data = await ordersApi.mine(token);
       setOrders(data);
-    } catch (e) {
-      setErr(e.message);
+    } catch (error) {
+      setErr(error.message);
     }
   }
 
@@ -40,9 +36,9 @@ export default function PastOrders() {
     try {
       await ordersApi.cancel(token, orderId);
       await load();
-    } catch (e) {
-      setErr(e.message);
-      throw e; // allow caller to know it failed
+    } catch (error) {
+      setErr(error.message);
+      throw error;
     } finally {
       setBusyOrderId(null);
     }
@@ -54,75 +50,86 @@ export default function PastOrders() {
     return "yellow";
   }
 
-  if (err) return <div className="text-red-600">{err}</div>;
-
   return (
     <div className="space-y-6">
-      <Card
-        title="Past orders"
-        right={<span className="text-sm text-slate-500">{orders.length} orders</span>}
-      >
-        {/* Refund/notice banner */}
-        {notice && (
-          <div className="mb-4 rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-800 dark:border-emerald-900/40 dark:bg-emerald-950/30 dark:text-emerald-200">
-            {notice}
-          </div>
-        )}
+      <section className="glass-panel-strong rounded-[2.4rem] px-6 py-8 sm:px-8">
+        <div className="relative z-[1]">
+          <div className="section-kicker">Order history</div>
+          <h1 className="mt-3 font-display text-5xl font-semibold leading-[0.96] text-balance">
+            Review previous purchases in one polished timeline.
+          </h1>
+          <p className="mt-4 text-sm leading-7 text-[color:var(--muted)]">
+            Check status, inspect line items, and cancel confirmed orders while stock restoration stays automatic.
+          </p>
+        </div>
+      </section>
 
+      {err && (
+        <div className="rounded-[1.6rem] border border-red-200/70 bg-red-100/80 px-5 py-4 text-sm font-semibold text-red-800 dark:border-red-900/50 dark:bg-red-950/30 dark:text-red-200">
+          {err}
+        </div>
+      )}
+
+      {notice && (
+        <div className="rounded-[1.6rem] border border-emerald-200/70 bg-emerald-100/80 px-5 py-4 text-sm font-semibold text-emerald-800 dark:border-emerald-900/50 dark:bg-emerald-950/30 dark:text-emerald-200">
+          {notice}
+        </div>
+      )}
+
+      <Card title="Past orders" subtitle={`${orders.length} order records available`}>
         {orders.length === 0 ? (
-          <div className="text-sm text-slate-600">No orders yet.</div>
+          <div className="text-sm text-[color:var(--muted)]">No orders yet.</div>
         ) : (
           <div className="space-y-4">
-            {orders.map((o) => {
-              const isBusy = busyOrderId === o.order_id;
-              const canDelete = o.status === "Confirmed";
+            {orders.map((order) => {
+              const isBusy = busyOrderId === order.order_id;
+              const canDelete = order.status === "Confirmed";
 
               return (
-                <div key={o.order_id} className="rounded-2xl border border-slate-200 p-4">
-                  <div className="flex flex-wrap items-center justify-between gap-2">
-                    <div className="font-extrabold">Order #{o.order_id}</div>
-
-                    <div className="flex items-center gap-2">
-                      <Badge tone={badgeTone(o.status)}>{o.status}</Badge>
-                      <div className="text-sm font-bold">
-                        {Number(o.total_price).toFixed(2)} EGP
+                <div key={order.order_id} className="rounded-[1.8rem] border border-[color:var(--stroke)] bg-white/45 p-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.6)] dark:bg-white/5">
+                  <div className="flex flex-wrap items-center justify-between gap-3">
+                    <div>
+                      <div className="font-display text-2xl font-semibold text-[color:var(--text)]">Order #{order.order_id}</div>
+                      <div className="mt-1 text-xs font-bold uppercase tracking-[0.18em] text-[color:var(--muted)]">
+                        {new Date(order.order_date).toLocaleString()} • paid **** {order.payment_last4 || "----"}
                       </div>
+                    </div>
 
+                    <div className="flex flex-wrap items-center gap-2">
+                      <Badge tone={badgeTone(order.status)}>{order.status}</Badge>
+                      <div className="rounded-full border border-[color:var(--stroke-strong)] bg-white/60 px-4 py-2 text-sm font-black text-[color:var(--text)] dark:bg-white/5">
+                        {Number(order.total_price).toFixed(2)} EGP
+                      </div>
                       {canDelete && (
                         <Button
                           variant="danger"
-                          type="button"
                           disabled={isBusy}
                           onClick={() => {
                             setErr("");
                             setNotice("");
-                            setConfirmOrderId(o.order_id); // open confirm modal
+                            setConfirmOrderId(order.order_id);
                           }}
                         >
-                          Delete order
+                          Cancel order
                         </Button>
                       )}
                     </div>
                   </div>
 
-                  <div className="mt-1 text-xs text-slate-500">
-                    {new Date(o.order_date).toLocaleString()} • paid ****{" "}
-                    {o.payment_last4 || "----"}
-                  </div>
-
-                  <div className="mt-3">
+                  <div className="mt-4">
                     <Table
                       keyField="isbn"
+                      emptyMessage="This order has no line items."
                       columns={[
                         { key: "book_name_snapshot", header: "Book" },
                         { key: "qty", header: "Qty" },
                         {
                           key: "unit_price_snapshot",
                           header: "Unit",
-                          render: (r) => Number(r.unit_price_snapshot).toFixed(2),
+                          render: (item) => Number(item.unit_price_snapshot).toFixed(2),
                         },
                       ]}
-                      rows={o.items}
+                      rows={order.items}
                     />
                   </div>
                 </div>
@@ -131,59 +138,38 @@ export default function PastOrders() {
           </div>
         )}
 
-        {/* Confirm cancel modal */}
         {confirmOrderId != null && (
           <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-            <div
-              className="absolute inset-0 bg-slate-950/40"
-              onClick={() => (busyOrderId ? null : setConfirmOrderId(null))}
-            />
-            <div className="relative w-full max-w-md rounded-2xl border border-slate-200 bg-white p-5 shadow-xl dark:border-slate-800 dark:bg-slate-950">
-              <div className="text-lg font-extrabold text-slate-900 dark:text-white">
-                Cancel this order?
-              </div>
-
-              <div className="mt-2 text-sm text-slate-600 dark:text-slate-300">
-                This will cancel <span className="font-bold">Order #{confirmOrderId}</span> and
-                restore stock automatically.
-              </div>
-
-              <div className="mt-3 rounded-2xl border border-slate-200 bg-slate-50 p-3 text-sm text-slate-700 dark:border-slate-800 dark:bg-slate-900/40 dark:text-slate-200">
-                <div className="font-bold mb-1">Refund info</div>
-                If you paid by card, refunds are processed within{" "}
-                <span className="font-semibold">5 business days</span>.
-              </div>
-
-              <div className="mt-4 flex items-center justify-end gap-2">
-                <Button
-                  type="button"
-                  variant="secondary"
-                  disabled={!!busyOrderId}
-                  onClick={() => setConfirmOrderId(null)}
-                >
-                  No, keep it
-                </Button>
-
-                <Button
-                  type="button"
-                  variant="danger"
-                  disabled={busyOrderId === confirmOrderId}
-                  onClick={async () => {
-                    setErr("");
-                    setNotice("");
-                    try {
-                      await deleteOrder(confirmOrderId);
-                      setNotice(
-                        "Order cancelled."
-                      );
-                      setConfirmOrderId(null);
-                    } catch (_) {
-                      // error is already set in state
-                    }
-                  }}
-                >
-                  {busyOrderId === confirmOrderId ? "Cancelling..." : "Yes, cancel order"}
-                </Button>
+            <div className="absolute inset-0 bg-slate-950/45 backdrop-blur-sm" onClick={() => (busyOrderId ? null : setConfirmOrderId(null))} />
+            <div className="glass-panel relative w-full max-w-md rounded-[2rem] p-6">
+              <div className="relative z-[1]">
+                <div className="font-display text-3xl font-semibold text-[color:var(--text)]">Cancel this order?</div>
+                <div className="mt-3 text-sm leading-7 text-[color:var(--muted)]">
+                  This will cancel <span className="font-bold text-[color:var(--text)]">Order #{confirmOrderId}</span> and restore stock automatically.
+                </div>
+                <div className="mt-4 rounded-[1.4rem] border border-[color:var(--stroke)] bg-white/45 p-4 text-sm text-[color:var(--muted)] dark:bg-white/5">
+                  If you paid by card, refunds are processed within <span className="font-semibold text-[color:var(--text)]">5 business days</span>.
+                </div>
+                <div className="mt-5 flex flex-wrap justify-end gap-2">
+                  <Button variant="secondary" disabled={!!busyOrderId} onClick={() => setConfirmOrderId(null)}>
+                    Keep order
+                  </Button>
+                  <Button
+                    variant="danger"
+                    disabled={busyOrderId === confirmOrderId}
+                    onClick={async () => {
+                      setErr("");
+                      setNotice("");
+                      try {
+                        await deleteOrder(confirmOrderId);
+                        setNotice("Order cancelled.");
+                        setConfirmOrderId(null);
+                      } catch {}
+                    }}
+                  >
+                    {busyOrderId === confirmOrderId ? "Cancelling..." : "Confirm cancel"}
+                  </Button>
+                </div>
               </div>
             </div>
           </div>

@@ -1,13 +1,32 @@
-export default function Card({ title, children, right }) {
+export default function Card({
+  title,
+  subtitle,
+  children,
+  right,
+  className = "",
+  contentClassName = "",
+}) {
+  const titleIsString = typeof title === "string";
+
   return (
-    <div className="rounded-2xl bg-white p-5 shadow-sm ring-1 ring-slate-200 dark:bg-slate-900 dark:ring-slate-800">
+    <section className={`glass-panel rounded-[2rem] p-6 sm:p-7 ${className}`}>
       {(title || right) && (
-        <div className="mb-4 flex items-center justify-between">
-          <h2 className="text-lg font-bold">{title}</h2>
+        <div className="relative z-[1] mb-6 flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+          <div className="space-y-1">
+            {title &&
+              (titleIsString ? (
+                <h2 className="font-display text-[1.8rem] font-semibold leading-tight text-[color:var(--text)]">
+                  {title}
+                </h2>
+              ) : (
+                title
+              ))}
+            {subtitle && <p className="max-w-2xl text-sm text-[color:var(--muted)]">{subtitle}</p>}
+          </div>
           {right}
         </div>
       )}
-      {children}
-    </div>
+      <div className={`relative z-[1] ${contentClassName}`}>{children}</div>
+    </section>
   );
 }

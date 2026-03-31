@@ -28,8 +28,8 @@ export default function Reports() {
         setPrev(prevData);
         setTopC(topCustomersData);
         setTopB(topBooksData);
-      } catch (e) {
-        setErr(e.message);
+      } catch (error) {
+        setErr(error.message);
       }
     })();
   }, [token]);
@@ -38,8 +38,8 @@ export default function Reports() {
     setErr("");
     try {
       setDaySales(await reportsApi.salesByDay(token, day));
-    } catch (e) {
-      setErr(e.message);
+    } catch (error) {
+      setErr(error.message);
     }
   }
 
@@ -47,55 +47,88 @@ export default function Reports() {
     setErr("");
     try {
       setReplCount(await reportsApi.replenishmentCount(token, isbn));
-    } catch (e) {
-      setErr(e.message);
+    } catch (error) {
+      setErr(error.message);
     }
   }
 
   return (
     <div className="space-y-6">
-      {err && <div className="text-sm text-red-600">{err}</div>}
+      <section className="glass-panel-strong rounded-[2.4rem] px-6 py-8 sm:px-8">
+        <div className="relative z-[1]">
+          <div className="section-kicker">Reporting</div>
+          <h1 className="mt-3 font-display text-5xl font-semibold leading-[0.96] text-balance">
+            Decision-ready numbers with a more polished reporting surface.
+          </h1>
+          <p className="mt-4 text-sm leading-7 text-[color:var(--muted)]">
+            Inspect sales, best performers, and replenishment patterns without leaving the admin workspace.
+          </p>
+        </div>
+      </section>
 
-      <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
-        <Card title="Sales (previous month)">
-          <div className="text-3xl font-black">{prev ? Number(prev.total_sales).toFixed(2) : "—"} EGP</div>
-        </Card>
+      {err && (
+        <div className="rounded-[1.6rem] border border-red-200/70 bg-red-100/80 px-5 py-4 text-sm font-semibold text-red-800 dark:border-red-900/50 dark:bg-red-950/30 dark:text-red-200">
+          {err}
+        </div>
+      )}
 
-        <Card title="Sales (certain day)">
-          <div className="space-y-2">
-            <Input label="Date (YYYY-MM-DD)" value={day} onChange={(e)=>setDay(e.target.value)} />
-            <Button variant="secondary" onClick={fetchDay}>Get</Button>
-            <div className="text-lg font-black">{daySales ? Number(daySales.total_sales).toFixed(2) : "—"} EGP</div>
+      <div className="grid gap-4 md:grid-cols-3">
+        <div className="glass-panel rounded-[2rem] p-5">
+          <div className="relative z-[1] text-[0.72rem] font-extrabold uppercase tracking-[0.2em] text-[color:var(--muted)]">
+            Previous month sales
           </div>
-        </Card>
-
-        <Card title="Book replenishments count">
-          <div className="space-y-2">
-            <Input label="ISBN" value={isbn} onChange={(e)=>setIsbn(e.target.value)} />
-            <Button variant="secondary" onClick={fetchReplCount}>Get</Button>
-            <div className="text-lg font-black">{replCount ? replCount.times_ordered : "—"}</div>
+          <div className="mt-3 font-display text-4xl font-semibold text-[color:var(--text)]">
+            {prev ? Number(prev.total_sales).toFixed(2) : "—"} EGP
           </div>
-        </Card>
+        </div>
+        <div className="glass-panel rounded-[2rem] p-5">
+          <div className="relative z-[1] text-[0.72rem] font-extrabold uppercase tracking-[0.2em] text-[color:var(--muted)]">
+            Sales on a chosen day
+          </div>
+          <div className="mt-4 space-y-3">
+            <Input label="Date (YYYY-MM-DD)" value={day} onChange={(event) => setDay(event.target.value)} />
+            <Button variant="secondary" onClick={fetchDay}>
+              Get value
+            </Button>
+            <div className="text-lg font-black text-[color:var(--text)]">
+              {daySales ? Number(daySales.total_sales).toFixed(2) : "—"} EGP
+            </div>
+          </div>
+        </div>
+        <div className="glass-panel rounded-[2rem] p-5">
+          <div className="relative z-[1] text-[0.72rem] font-extrabold uppercase tracking-[0.2em] text-[color:var(--muted)]">
+            Replenishment count by ISBN
+          </div>
+          <div className="mt-4 space-y-3">
+            <Input label="ISBN" value={isbn} onChange={(event) => setIsbn(event.target.value)} />
+            <Button variant="secondary" onClick={fetchReplCount}>
+              Get value
+            </Button>
+            <div className="text-lg font-black text-[color:var(--text)]">{replCount ? replCount.times_ordered : "—"}</div>
+          </div>
+        </div>
       </div>
 
-      <Card title="Top 5 customers (last 3 months)">
+      <Card title="Top 5 customers" subtitle="Highest spenders across the last 3 months.">
         <Table
           keyField="user_id"
+          emptyMessage="No customer report data yet."
           columns={[
             { key: "username", header: "Customer" },
-            { key: "total_spent", header: "Total spent", render: r => Number(r.total_spent).toFixed(2) }
+            { key: "total_spent", header: "Total spent", render: (row) => Number(row.total_spent).toFixed(2) },
           ]}
           rows={topC}
         />
       </Card>
 
-      <Card title="Top 10 selling books (last 3 months)">
+      <Card title="Top 10 selling books" subtitle="Best-selling titles across the last 3 months.">
         <Table
           keyField="isbn"
+          emptyMessage="No book report data yet."
           columns={[
             { key: "book_name_snapshot", header: "Book" },
             { key: "isbn", header: "ISBN" },
-            { key: "total_sold", header: "Copies sold" }
+            { key: "total_sold", header: "Copies sold" },
           ]}
           rows={topB}
         />

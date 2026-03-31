@@ -2,64 +2,38 @@ import Card from "../../components/ui/Card";
 
 export default function Privacy() {
   return (
-    <div className="mx-auto max-w-3xl">
-      <Card className="p-6">
-        <h1 className="text-2xl font-black tracking-tight text-slate-900 dark:text-white">
-          Privacy Policy
-        </h1>
-
-        <p className="mt-2 text-sm text-slate-600 dark:text-slate-400">
-          Your privacy is important to us.
-        </p>
-
-        <div className="mt-6 space-y-5 text-sm text-slate-700 dark:text-slate-200">
-          <section>
-            <h2 className="font-semibold text-slate-900 dark:text-white">
-              Information We Collect
-            </h2>
-            <p className="mt-2">
-              We collect basic information such as your name, email, and order
-              details to provide our services.
-            </p>
-          </section>
-
-          <section>
-            <h2 className="font-semibold text-slate-900 dark:text-white">
-              How We Use Your Information
-            </h2>
-            <ul className="mt-2 list-disc space-y-1 pl-5">
-              <li>To process and deliver orders</li>
-              <li>To communicate order updates</li>
-              <li>To improve our services</li>
-            </ul>
-          </section>
-
-          <section>
-            <h2 className="font-semibold text-slate-900 dark:text-white">
-              Data Protection
-            </h2>
-            <p className="mt-2">
-              Your data is stored securely and is never shared with third
-              parties without your consent.
-            </p>
-          </section>
-
-          <section>
-            <h2 className="font-semibold text-slate-900 dark:text-white">
-              Contact
-            </h2>
-            <p className="mt-2">
-              If you have any questions about this policy, contact us at{" "}
-              <a
-                href="mailto:support@booky.com"
-                className="font-semibold underline underline-offset-4"
-              >
-                support@booky.com
-              </a>
-              .
-            </p>
-          </section>
+    <div className="mx-auto max-w-4xl space-y-6">
+      <section className="glass-panel-strong rounded-[2.4rem] px-6 py-8 sm:px-8">
+        <div className="relative z-[1]">
+          <div className="section-kicker">Privacy</div>
+          <h1 className="mt-3 font-display text-5xl font-semibold leading-[0.96] text-balance">
+            Clear data usage notes, without legal clutter.
+          </h1>
         </div>
+      </section>
+
+      <Card title="Information we collect" subtitle="The basics Booky needs to serve the storefront experience.">
+        <p className="text-sm leading-7 text-[color:var(--text)]">
+          We collect core information such as your name, email, and order details so the app can handle checkout, delivery, and account-related flows.
+        </p>
+      </Card>
+
+      <Card title="How information is used" subtitle="The main purposes behind the data we store.">
+        <ul className="space-y-3 text-sm leading-7 text-[color:var(--text)]">
+          <li className="rounded-[1.4rem] border border-[color:var(--stroke)] bg-white/45 p-4 dark:bg-white/5">To process and deliver orders</li>
+          <li className="rounded-[1.4rem] border border-[color:var(--stroke)] bg-white/45 p-4 dark:bg-white/5">To communicate order updates</li>
+          <li className="rounded-[1.4rem] border border-[color:var(--stroke)] bg-white/45 p-4 dark:bg-white/5">To improve the product and shopping experience</li>
+        </ul>
+      </Card>
+
+      <Card title="Data protection" subtitle="A short summary of how customer data is treated.">
+        <p className="text-sm leading-7 text-[color:var(--text)]">
+          Your data is stored securely and is not shared with third parties without your consent. If you have questions, contact{" "}
+          <a href="mailto:support@booky.com" className="font-semibold underline underline-offset-4">
+            support@booky.com
+          </a>
+          .
+        </p>
       </Card>
     </div>
   );

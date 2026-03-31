@@ -1,20 +1,20 @@
 import { useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { CreditCard, ShieldCheck, Truck } from "lucide-react";
 import Card from "../../components/ui/Card";
 import Input from "../../components/ui/Input";
 import Button from "../../components/ui/Button";
 import { ordersApi } from "../../api/orders";
 import { useAuth } from "../../context/AuthContext";
 
+const selectClassName =
+  "w-full rounded-[1.3rem] border border-[color:var(--stroke-strong)] bg-white/75 px-4 py-3 text-sm text-[color:var(--text)] shadow-[inset_0_1px_0_rgba(255,255,255,0.72)] outline-none transition-all duration-300 focus:-translate-y-px focus:border-[color:var(--accent)] focus:bg-white focus:shadow-[0_0_0_4px_rgba(199,108,43,0.12)] dark:bg-white/5 dark:shadow-none dark:focus:bg-white/10";
+
 export default function Checkout() {
   const { token } = useAuth();
-
-  // Payment
-  const [paymentMethod, setPaymentMethod] = useState("CARD"); // NEW
+  const [paymentMethod, setPaymentMethod] = useState("CARD");
   const [cardNumber, setCardNumber] = useState("");
   const [expiryMMYY, setExpiry] = useState("");
-
-  // Shipping
   const [fullName, setFullName] = useState("");
   const [phone, setPhone] = useState("");
   const [country, setCountry] = useState("Egypt");
@@ -23,107 +23,95 @@ export default function Checkout() {
   const [address2, setAddress2] = useState("");
   const [zip, setZip] = useState("");
   const [shippingMethod, setShippingMethod] = useState("STANDARD");
-
   const [err, setErr] = useState("");
   const [msg, setMsg] = useState("");
-  const nav = useNavigate();
+  const navigate = useNavigate();
 
-  // Simple demo shipping fee logic
   const shippingFee = useMemo(() => {
-    const base = shippingMethod === "EXPRESS" ? 80 : 50; // EGP
-    const major = ["Cairo", "Giza", "Alexandria"];
-    const remoteSurcharge = major.includes(city) ? 0 : 20;
+    const base = shippingMethod === "EXPRESS" ? 80 : 50;
+    const majorCities = ["Cairo", "Giza", "Alexandria"];
+    const remoteSurcharge = majorCities.includes(city) ? 0 : 20;
     return base + remoteSurcharge;
   }, [shippingMethod, city]);
 
-  const deliveryEstimate = useMemo(() => {
-    return shippingMethod === "EXPRESS"
-      ? "Estimated delivery: 1–2 business days"
-      : "Estimated delivery: 2–5 business days";
-  }, [shippingMethod]);
+  const deliveryEstimate = useMemo(
+    () => (shippingMethod === "EXPRESS" ? "Estimated delivery: 1–2 business days" : "Estimated delivery: 2–5 business days"),
+    [shippingMethod]
+  );
 
-  async function submit(e) {
-    e.preventDefault();
+  async function submit(event) {
+    event.preventDefault();
     setErr("");
     setMsg("");
 
-    // Front-end validation
     if (!fullName.trim() || !phone.trim() || !address1.trim() || !city.trim()) {
       setErr("Please fill shipping details (name, phone, address, city).");
       return;
     }
 
-    // Payment validation
-    if (paymentMethod === "CARD") {
-      if (!cardNumber.trim() || !expiryMMYY.trim()) {
-        setErr("Please enter card number and expiry, or choose Cash on Delivery.");
-        return;
-      }
+    if (paymentMethod === "CARD" && (!cardNumber.trim() || !expiryMMYY.trim())) {
+      setErr("Please enter card number and expiry, or choose Cash on Delivery.");
+      return;
     }
 
     try {
-      // Include paymentMethod
       const payload =
         paymentMethod === "COD"
           ? { paymentMethod: "COD" }
           : { paymentMethod: "CARD", cardNumber, expiryMMYY };
 
-      const r = await ordersApi.checkout(token, payload);
-
-      setMsg(`Checkout success ✅ Order #${r.order_id}`);
-      setTimeout(() => nav("/orders"), 800);
-    } catch (e2) {
-      setErr(e2.message);
+      const result = await ordersApi.checkout(token, payload);
+      setMsg(`Checkout success. Order #${result.order_id}`);
+      window.setTimeout(() => navigate("/orders"), 900);
+    } catch (error) {
+      setErr(error.message);
     }
   }
 
+  const optionClass = (active) =>
+    `rounded-[1.5rem] border px-4 py-4 text-left transition-all duration-300 ${
+      active
+        ? "border-transparent bg-[linear-gradient(135deg,var(--accent),var(--accent-deep))] text-white shadow-[0_18px_34px_rgba(199,108,43,0.24)]"
+        : "border-[color:var(--stroke-strong)] bg-white/55 text-[color:var(--text)] hover:-translate-y-0.5 hover:bg-white/80 dark:bg-white/5 dark:hover:bg-white/10"
+    }`;
+
   return (
-    <div className="mx-auto max-w-lg">
-      <Card title="Checkout">
-        <form onSubmit={submit} className="space-y-6">
-          {/* Shipping */}
-          <div className="space-y-3">
-            <div className="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
-              Shipping details
-            </div>
+    <div className="space-y-6">
+      <section className="glass-panel-strong rounded-[2.4rem] px-6 py-8 sm:px-8">
+        <div className="relative z-[1] flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+          <div>
+            <div className="section-kicker">Checkout</div>
+            <h1 className="mt-3 font-display text-5xl font-semibold leading-[0.96] text-balance">
+              Finish the order with a calmer, clearer flow.
+            </h1>
+            <p className="mt-4 text-sm leading-7 text-[color:var(--muted)]">
+              Shipping details, delivery choice, and payment method are grouped more intentionally so the last step feels confident instead of crowded.
+            </p>
+          </div>
+        </div>
+      </section>
 
-            <Input
-              label="Full name"
-              value={fullName}
-              onChange={(e) => setFullName(e.target.value)}
-              placeholder="e.g. Omar Hany"
-            />
+      <form onSubmit={submit} className="grid gap-6 xl:grid-cols-[1.1fr_360px]">
+        <div className="space-y-6">
+          <Card title="Shipping details" subtitle="Tell us where the books should go.">
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+              <Input label="Full name" value={fullName} onChange={(event) => setFullName(event.target.value)} placeholder="e.g. Omar Hany" />
+              <Input label="Phone" value={phone} onChange={(event) => setPhone(event.target.value)} placeholder="e.g. 01xxxxxxxxx" />
 
-            <Input
-              label="Phone"
-              value={phone}
-              onChange={(e) => setPhone(e.target.value)}
-              placeholder="e.g. 01xxxxxxxxx"
-            />
-
-            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-              <div>
-                <label className="mb-1 block text-sm font-medium text-slate-700 dark:text-slate-200">
+              <label className="block">
+                <span className="mb-2 block text-[0.72rem] font-extrabold uppercase tracking-[0.2em] text-[color:var(--muted)]">
                   Country
-                </label>
-                <select
-                  value={country}
-                  onChange={(e) => setCountry(e.target.value)}
-                  className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 shadow-sm outline-none focus:ring-2 focus:ring-slate-300 dark:border-slate-800 dark:bg-slate-950 dark:text-slate-100"
-                >
+                </span>
+                <select value={country} onChange={(event) => setCountry(event.target.value)} className={selectClassName}>
                   <option>Egypt</option>
                 </select>
-              </div>
+              </label>
 
-              <div>
-                <label className="mb-1 block text-sm font-medium text-slate-700 dark:text-slate-200">
+              <label className="block">
+                <span className="mb-2 block text-[0.72rem] font-extrabold uppercase tracking-[0.2em] text-[color:var(--muted)]">
                   City
-                </label>
-                <select
-                  value={city}
-                  onChange={(e) => setCity(e.target.value)}
-                  className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 shadow-sm outline-none focus:ring-2 focus:ring-slate-300 dark:border-slate-800 dark:bg-slate-950 dark:text-slate-100"
-                >
+                </span>
+                <select value={city} onChange={(event) => setCity(event.target.value)} className={selectClassName}>
                   <option>Cairo</option>
                   <option>Giza</option>
                   <option>Alexandria</option>
@@ -131,124 +119,142 @@ export default function Checkout() {
                   <option>Tanta</option>
                   <option>Aswan</option>
                 </select>
+              </label>
+
+              <div className="md:col-span-2">
+                <Input
+                  label="Address line 1"
+                  value={address1}
+                  onChange={(event) => setAddress1(event.target.value)}
+                  placeholder="Street, building, apartment"
+                />
+              </div>
+              <div className="md:col-span-2">
+                <Input
+                  label="Address line 2"
+                  value={address2}
+                  onChange={(event) => setAddress2(event.target.value)}
+                  placeholder="Landmark or extra instructions"
+                />
+              </div>
+              <div className="md:col-span-2">
+                <Input
+                  label="ZIP / postal code"
+                  value={zip}
+                  onChange={(event) => setZip(event.target.value)}
+                  placeholder="e.g. 12345"
+                />
               </div>
             </div>
+          </Card>
 
-            <Input
-              label="Address line 1"
-              value={address1}
-              onChange={(e) => setAddress1(e.target.value)}
-              placeholder="Street, building, apartment"
-            />
-
-            <Input
-              label="Address line 2 (optional)"
-              value={address2}
-              onChange={(e) => setAddress2(e.target.value)}
-              placeholder="Landmark, additional details"
-            />
-
-            <Input
-              label="ZIP / Postal code (optional)"
-              value={zip}
-              onChange={(e) => setZip(e.target.value)}
-              placeholder="e.g. 12345"
-            />
-
-            <div>
-              <label className="mb-1 block text-sm font-medium text-slate-700 dark:text-slate-200">
-                Shipping method
-              </label>
-              <select
-                value={shippingMethod}
-                onChange={(e) => setShippingMethod(e.target.value)}
-                className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 shadow-sm outline-none focus:ring-2 focus:ring-slate-300 dark:border-slate-800 dark:bg-slate-950 dark:text-slate-100"
-              >
-                <option value="STANDARD">Standard (2–5 days)</option>
-                <option value="EXPRESS">Express (1–2 days)</option>
-              </select>
-
-              <div className="mt-2 text-xs text-slate-600 dark:text-slate-400">
-                {deliveryEstimate} • Shipping fee:{" "}
-                <span className="font-semibold text-slate-900 dark:text-white">
-                  {shippingFee} EGP
-                </span>
-              </div>
+          <Card title="Delivery speed" subtitle="Choose the shipping rhythm that fits this order.">
+            <div className="grid gap-3 sm:grid-cols-2">
+              <button type="button" className={optionClass(shippingMethod === "STANDARD")} onClick={() => setShippingMethod("STANDARD")}>
+                <div className="text-[0.72rem] font-extrabold uppercase tracking-[0.2em]">Standard</div>
+                <div className="mt-2 text-lg font-semibold">2–5 business days</div>
+                <div className="mt-2 text-sm opacity-80">50 EGP base fee with a small remote-city adjustment when needed.</div>
+              </button>
+              <button type="button" className={optionClass(shippingMethod === "EXPRESS")} onClick={() => setShippingMethod("EXPRESS")}>
+                <div className="text-[0.72rem] font-extrabold uppercase tracking-[0.2em]">Express</div>
+                <div className="mt-2 text-lg font-semibold">1–2 business days</div>
+                <div className="mt-2 text-sm opacity-80">Priority delivery for readers who want the title sooner.</div>
+              </button>
             </div>
-          </div>
+          </Card>
 
-          {/* Payment */}
-          <div className="space-y-3">
-            <div className="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
-              Payment
+          <Card title="Payment" subtitle="Choose card payment or keep it simple with cash on delivery.">
+            <div className="grid gap-3 sm:grid-cols-2">
+              <button type="button" className={optionClass(paymentMethod === "CARD")} onClick={() => setPaymentMethod("CARD")}>
+                <div className="text-[0.72rem] font-extrabold uppercase tracking-[0.2em]">Card</div>
+                <div className="mt-2 text-lg font-semibold">Credit / Debit</div>
+                <div className="mt-2 text-sm opacity-80">Client-side validation is applied before order submission.</div>
+              </button>
+              <button type="button" className={optionClass(paymentMethod === "COD")} onClick={() => setPaymentMethod("COD")}>
+                <div className="text-[0.72rem] font-extrabold uppercase tracking-[0.2em]">Cash</div>
+                <div className="mt-2 text-lg font-semibold">Pay on delivery</div>
+                <div className="mt-2 text-sm opacity-80">Keep the final step lighter and pay when the order arrives.</div>
+              </button>
             </div>
 
-            {/* Payment method selector */}
-            <div>
-              <label className="mb-1 block text-sm font-medium text-slate-700 dark:text-slate-200">
-                Payment method
-              </label>
-              <select
-                value={paymentMethod}
-                onChange={(e) => setPaymentMethod(e.target.value)}
-                className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 shadow-sm outline-none focus:ring-2 focus:ring-slate-300 dark:border-slate-800 dark:bg-slate-950 dark:text-slate-100"
-              >
-                <option value="CARD">Credit / Debit Card</option>
-                <option value="COD">Cash on Delivery</option>
-              </select>
-
-              {paymentMethod === "COD" && (
-                <div className="mt-2 text-xs text-slate-600 dark:text-slate-400">
-                  You will pay in cash when the order arrives.
-                </div>
-              )}
-            </div>
-
-            {/* Card fields only when CARD */}
             {paymentMethod === "CARD" && (
-              <>
+              <div className="mt-4 grid gap-4 md:grid-cols-2">
                 <Input
                   label="Credit card number"
                   value={cardNumber}
-                  onChange={(e) => setCardNumber(e.target.value)}
+                  onChange={(event) => setCardNumber(event.target.value)}
                   placeholder="e.g. 4242 4242 4242 4242"
                 />
-
                 <Input
                   label="Expiry (MMYY)"
                   value={expiryMMYY}
-                  onChange={(e) => setExpiry(e.target.value)}
+                  onChange={(event) => setExpiry(event.target.value)}
                   placeholder="e.g. 0728"
                 />
-              </>
+              </div>
             )}
-          </div>
-
-          {/* Policies */}
-          <div className="rounded-2xl border border-slate-200 bg-white/40 p-4 text-sm text-slate-700 dark:border-slate-800 dark:bg-slate-950/30 dark:text-slate-200">
-            <div className="font-semibold text-slate-900 dark:text-white">
-              Shipping & Returns Policy
-            </div>
-            <ul className="mt-2 list-disc space-y-1 pl-5 text-xs text-slate-600 dark:text-slate-400">
-              <li>Orders are processed within 24 hours.</li>
-              <li>Returns accepted within 7 days of delivery.</li>
-              <li>Books must be unused and in original condition.</li>
-              <li>Refunds are processed within 5 business days.</li>
-            </ul>
-          </div>
-
-          {err && <div className="text-sm text-red-600">{err}</div>}
-          {msg && <div className="text-sm text-emerald-700">{msg}</div>}
-
-          <Button className="w-full" type="submit">
-            {paymentMethod === "COD" ? "Place order (Cash on Delivery)" : "Pay & Place order"}
-          </Button>
-        </form>
-
-        <div className="mt-3 text-xs text-slate-500">
-          Demo validation: card uses Luhn + expiry must be in the future.
+          </Card>
         </div>
-      </Card>
+
+        <div className="space-y-4 xl:sticky xl:top-28 xl:self-start">
+          <Card title="Order summary" subtitle="Final delivery context before you place the order.">
+            <div className="space-y-4">
+              <div className="rounded-[1.4rem] border border-[color:var(--stroke)] bg-white/45 p-4 dark:bg-white/5">
+                <div className="flex items-center gap-3">
+                  <Truck className="h-5 w-5 text-[color:var(--teal)]" />
+                  <div>
+                    <div className="font-semibold text-[color:var(--text)]">{shippingMethod === "EXPRESS" ? "Express delivery" : "Standard delivery"}</div>
+                    <div className="text-sm text-[color:var(--muted)]">{deliveryEstimate}</div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="rounded-[1.4rem] border border-[color:var(--stroke)] bg-white/45 p-4 dark:bg-white/5">
+                <div className="flex items-center gap-3">
+                  <CreditCard className="h-5 w-5 text-[color:var(--accent-deep)]" />
+                  <div>
+                    <div className="font-semibold text-[color:var(--text)]">
+                      {paymentMethod === "CARD" ? "Card payment" : "Cash on Delivery"}
+                    </div>
+                    <div className="text-sm text-[color:var(--muted)]">
+                      {paymentMethod === "CARD" ? "Validated before the order is placed." : "Pay when the shipment arrives."}
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="flex items-center justify-between rounded-[1.4rem] border border-[color:var(--stroke)] bg-white/45 px-4 py-4 dark:bg-white/5">
+                <span className="text-sm text-[color:var(--muted)]">Shipping fee</span>
+                <span className="text-xl font-black text-[color:var(--text)]">{shippingFee} EGP</span>
+              </div>
+
+              {err && (
+                <div className="rounded-[1.3rem] border border-red-200/70 bg-red-100/80 px-4 py-3 text-sm font-semibold text-red-800 dark:border-red-900/50 dark:bg-red-950/30 dark:text-red-200">
+                  {err}
+                </div>
+              )}
+              {msg && (
+                <div className="rounded-[1.3rem] border border-emerald-200/70 bg-emerald-100/80 px-4 py-3 text-sm font-semibold text-emerald-800 dark:border-emerald-900/50 dark:bg-emerald-950/30 dark:text-emerald-200">
+                  {msg}
+                </div>
+              )}
+
+              <Button className="w-full" type="submit">
+                {paymentMethod === "COD" ? "Place order" : "Pay and place order"}
+              </Button>
+            </div>
+          </Card>
+
+          <div className="glass-panel rounded-[2rem] p-5">
+            <div className="relative z-[1] flex items-start gap-3">
+              <ShieldCheck className="mt-1 h-5 w-5 text-[color:var(--success)]" />
+              <div className="text-sm leading-7 text-[color:var(--muted)]">
+                Demo validation still checks card structure with Luhn logic and confirms expiry is in the future before submission.
+              </div>
+            </div>
+          </div>
+        </div>
+      </form>
     </div>
   );
 }

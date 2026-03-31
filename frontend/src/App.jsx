@@ -27,25 +27,30 @@ import Reports from "./pages/admin/Reports.jsx";
 
 export default function App() {
   return (
-    <div className="flex min-h-screen flex-col bg-slate-50 text-slate-900 dark:bg-slate-950 dark:text-slate-100">
+    <div className="relative flex min-h-screen flex-col overflow-x-clip text-[color:var(--text)]">
+      <div className="pointer-events-none fixed inset-0 -z-10 overflow-hidden">
+        <div className="absolute inset-0 grid-fade opacity-60" />
+        <div className="ambient-float absolute left-[-5rem] top-20 h-60 w-60 rounded-full bg-[radial-gradient(circle,rgba(199,108,43,0.24),transparent_65%)]" />
+        <div className="ambient-float-delayed absolute right-[-6rem] top-56 h-72 w-72 rounded-full bg-[radial-gradient(circle,rgba(47,113,116,0.24),transparent_65%)]" />
+        <div className="ambient-float absolute bottom-[-8rem] left-1/3 h-64 w-64 rounded-full bg-[radial-gradient(circle,rgba(255,255,255,0.18),transparent_65%)]" />
+      </div>
+
       <Navbar />
 
-      {/* MAIN CONTENT */}
-      <div className="mx-auto w-full max-w-7xl flex-1 px-4 py-6">
+      <main className="mx-auto w-full max-w-7xl flex-1 px-4 pb-16 pt-6 sm:px-6 lg:px-8">
         <Routes>
           <Route path="/" element={<Navigate to="/books" />} />
 
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
-          
+
           <Route path="/how-to-buy" element={<HowToBuy />} />
           <Route path="/shipping" element={<Shipping />} />
           <Route path="/privacy" element={<Privacy />} />
           <Route path="/support" element={<Support />} />
-          
+
           <Route path="/quizzes" element={<ReadingQuiz />} />
 
-          {/* Customer */}
           <Route path="/books" element={<BrowseBooks />} />
           <Route path="/books/:isbn" element={<BookDetails />} />
 
@@ -56,12 +61,11 @@ export default function App() {
             <Route path="/profile" element={<Profile />} />
           </Route>
 
-          {/* Admin */}
           <Route element={<ProtectedRoute requiredRole="ADMIN" />}>
             <Route
               path="/admin/*"
               element={
-                <div className="grid grid-cols-1 gap-6 md:grid-cols-[260px_1fr]">
+                <div className="grid grid-cols-1 gap-6 lg:grid-cols-[290px_1fr]">
                   <Sidebar />
                   <div>
                     <Routes>
@@ -77,10 +81,26 @@ export default function App() {
             />
           </Route>
 
-          <Route path="*" element={<div className="p-6">Not found</div>} />
+          <Route
+            path="*"
+            element={
+              <div className="grid min-h-[50vh] place-items-center">
+                <div className="glass-panel-strong max-w-xl rounded-[2.4rem] px-8 py-10 text-center">
+                  <div className="section-kicker">Page not found</div>
+                  <h1 className="mt-3 font-display text-4xl font-semibold text-balance">
+                    This chapter is missing from the shelf.
+                  </h1>
+                  <p className="mt-3 text-sm leading-7 text-[color:var(--muted)]">
+                    The page you tried to open does not exist anymore, or the link is pointing somewhere old.
+                  </p>
+                </div>
+              </div>
+            }
+          />
         </Routes>
         <BookyAssistant />
-      </div>
+      </main>
+
       <Footer />
     </div>
   );
